@@ -83,7 +83,7 @@ namespace CommandTransmission
         protected override void InitializeModules()
         {
             base.InitializeModules();
-            Application.Current.MainWindow.Show();
+            ((MainWindow)Shell).Show();
         }
     }
 }

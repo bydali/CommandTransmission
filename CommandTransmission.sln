@@ -5,6 +5,19 @@ VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTransmission", "CommandTransmission\CommandTransmission.csproj", "{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationView", "OperationView\OperationView.csproj", "{AB761418-A1FA-4814-80C8-DFBD68A90479}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{C735BA55-49DD-4018-A892-9C896959A75C}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\Microsoft.Practices.ServiceLocation.dll = Libs\Microsoft.Practices.ServiceLocation.dll
+		Libs\Microsoft.Practices.Unity.Configuration.dll = Libs\Microsoft.Practices.Unity.Configuration.dll
+		Libs\Microsoft.Practices.Unity.dll = Libs\Microsoft.Practices.Unity.dll
+		Libs\Microsoft.Practices.Unity.RegistrationByConvention.dll = Libs\Microsoft.Practices.Unity.RegistrationByConvention.dll
+		Libs\Prism.dll = Libs\Prism.dll
+		Libs\Prism.Unity.Wpf.dll = Libs\Prism.Unity.Wpf.dll
+		Libs\Prism.Wpf.dll = Libs\Prism.Wpf.dll
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +28,10 @@ Global
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB761418-A1FA-4814-80C8-DFBD68A90479}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB761418-A1FA-4814-80C8-DFBD68A90479}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB761418-A1FA-4814-80C8-DFBD68A90479}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB761418-A1FA-4814-80C8-DFBD68A90479}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

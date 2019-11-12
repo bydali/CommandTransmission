@@ -3,9 +3,69 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
                       Title="MainWindow"
-                      Height="350"
-                      Width="525">
-    <Grid>
+					  xmlns:prism="http://prismlibrary.com/"
+					  prism:ViewModelLocator.AutoWireViewModel="True"
+					  >
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="0.2*"/>
+			<ColumnDefinition />
+			<ColumnDefinition Width="0.2*"/>
+		</Grid.ColumnDefinitions>
 
-    </Grid>
+		<TabControl>
+			<TabItem Header="操作" Controls:ControlsHelper.HeaderFontSize="15">
+				<!--<ContentControl prism:RegionManager.RegionName="OperationR"/>-->
+			</TabItem>
+			<TabItem Header="查询" Controls:ControlsHelper.HeaderFontSize="15">
+				<!--<ContentControl prism:RegionManager.RegionName="QueryR"/>-->
+			</TabItem>
+			<TabItem Header="参数设置" Controls:ControlsHelper.HeaderFontSize="15">
+				<!--<ContentControl prism:RegionManager.RegionName="ParameterR"/>-->
+			</TabItem>
+		</TabControl>
+
+		<Grid Grid.Column="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="0.2*"/>
+				<RowDefinition/>
+				<RowDefinition Height="0.2*"/>
+			</Grid.RowDefinitions>
+			<TabControl>
+				<TabItem Header="调度命令" Controls:ControlsHelper.HeaderFontSize="15">
+					<!--<ContentControl prism:RegionManager.RegionName="DispatchR"/>-->
+				</TabItem>
+			</TabControl>
+			<TabControl Grid.Row="1">
+				<TabItem Header="详细内容" Controls:ControlsHelper.HeaderFontSize="15">
+					<!--<ContentControl prism:RegionManager.RegionName="DetailR"/>-->
+				</TabItem>
+			</TabControl>
+			<!--<ContentControl Grid.Row="2" prism:RegionManager.RegionName="CommandListR"/>-->
+		</Grid>
+
+		<Grid Grid.Column="2">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="0.3*"/>
+				<RowDefinition/>
+				<RowDefinition Height="0.1*"/>
+			</Grid.RowDefinitions>
+			<TabControl>
+				<TabItem Header="常用词汇" Controls:ControlsHelper.HeaderFontSize="15">
+					<!--<ContentControl prism:RegionManager.RegionName="DetailR"/>-->
+				</TabItem>
+			</TabControl>
+			<TabControl Grid.Row="1">
+				<TabItem Header="无线受令列表" Controls:ControlsHelper.HeaderFontSize="15">
+					<!--<ContentControl prism:RegionManager.RegionName="DetailR"/>-->
+				</TabItem>
+			</TabControl>
+			<TabControl Grid.Row="2">
+				<TabItem Header="列控限速" Controls:ControlsHelper.HeaderFontSize="15">
+					<!--<ContentControl prism:RegionManager.RegionName="DetailR"/>-->
+				</TabItem>
+			</TabControl>
+		</Grid>
+
+	</Grid>
 </Controls:MetroWindow>
