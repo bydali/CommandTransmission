@@ -30,7 +30,6 @@ namespace CommandTransmission
 
         protected override void ConfigureModuleCatalog()
         {
-
         }
 
         protected override IUnityContainer CreateContainer()
