@@ -50,7 +50,9 @@
 						<StackPanel Orientation="Vertical" Grid.Row="1">
 							<Grid>
 								<Label Content="缓存命令" HorizontalAlignment="Center"/>
-								<Button Content="^" Width="30" HorizontalAlignment="Right"/>
+								<Button Width="30" HorizontalAlignment="Right">
+									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+								</Button>
 							</Grid>
 							<DataGrid>
 								<DataGrid.Columns>
@@ -63,7 +65,9 @@
 						<StackPanel Orientation="Vertical" Grid.Row="2">
 							<Grid>
 								<Label Content="接收命令" HorizontalAlignment="Center"/>
-								<Button Content="^" Width="30" HorizontalAlignment="Right"/>
+								<Button Width="30" HorizontalAlignment="Right">
+									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+								</Button>
 							</Grid>
 							<DataGrid>
 								<DataGrid.Columns>
@@ -76,7 +80,9 @@
 						<StackPanel Orientation="Vertical" Grid.Row="3">
 							<Grid>
 								<Label Content="发送命令" HorizontalAlignment="Center"/>
-								<Button Content="^" Width="30" HorizontalAlignment="Right"/>
+								<Button Width="30" HorizontalAlignment="Right">
+									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+								</Button>
 							</Grid>
 							<DataGrid>
 								<DataGrid.Columns>
@@ -89,7 +95,9 @@
 						<StackPanel Orientation="Vertical" Grid.Row="4">
 							<Grid>
 								<Label Content="已发命令" HorizontalAlignment="Center"/>
-								<Button Content="^" Width="30" HorizontalAlignment="Right"/>
+								<Button Width="30" HorizontalAlignment="Right">
+									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+								</Button>
 							</Grid>
 							<DataGrid>
 								<DataGrid.Columns>
@@ -102,8 +110,175 @@
 					</Grid>
 				</TabItem>
 				<TabItem Header="查询" Controls:ControlsHelper.HeaderFontSize="15">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="25"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition Height="auto"/>
+							<RowDefinition/>
+						</Grid.RowDefinitions>
+						<Grid>
+							<Label Content="查询条件" HorizontalAlignment="Center"/>
+							<Button HorizontalAlignment="Right">
+								<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+							</Button>
+						</Grid>
+						<Border Grid.Row="1" BorderBrush="AliceBlue" BorderThickness="2">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="40"/>
+									<ColumnDefinition/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition/>
+									<RowDefinition/>
+								</Grid.RowDefinitions>
+								<iconPacks:PackIconMaterial Kind="Clock" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								<StackPanel Orientation="Horizontal" Grid.Column="1" Grid.ColumnSpan="2">
+									<CheckBox Content="时间范围"/>
+									<CheckBox Content="精确匹配发令时间" Margin="20,0,0,0"/>
+								</StackPanel>
+								<StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+									<Label Content="从"/>
+									<TextBox Style="{x:Null}" Width="150" Height="18"/>
+								</StackPanel>
+								<StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+									<Label Content="至"/>
+									<TextBox Style="{x:Null}" Width="150" Height="18"/>
+								</StackPanel>
+							</Grid>
+						</Border>
+						<UniformGrid Grid.Row="2" Rows="1" Columns="2">
+							<Border BorderBrush="AliceBlue" BorderThickness="2">
+								<Grid Margin="0,5,5,5">
+									<Grid.RowDefinitions>
+										<RowDefinition/>
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+										<iconPacks:PackIconMaterial Kind="TrafficLight" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+										<CheckBox Content="调度命令号" Grid.Column="1" Margin="10,0,0,0"/>
+									</StackPanel>
+									<TextBox Style="{x:Null}" Width="100" Height="18" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+								</Grid>
+							</Border>
+							<Border BorderBrush="AliceBlue" BorderThickness="2">
+								<Grid Margin="0,5,5,5">
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+										<iconPacks:PackIconModern Kind="Page" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+										<CheckBox Content="日计划号" Grid.Column="1" Margin="10,0,0,0"/>
+									</StackPanel>
+									<TextBox Style="{x:Null}" Width="100" Height="18" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+								</Grid>
+							</Border>
+						</UniformGrid>
+						<Border Grid.Row="3" BorderBrush="AliceBlue" BorderThickness="2" Margin="0,5,0,0">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition/>
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="40"/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<iconPacks:PackIconOcticons Kind="Organization" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								<CheckBox Content="发令单位或发令人" Grid.Column="1"/>
+								<TextBox Margin="0,5,0,0" Style="{x:Null}" Height="18" Grid.Column="1" Grid.Row="1" Width="150" HorizontalAlignment="Left"/>
+							</Grid>
+						</Border>
+						<Border Grid.Row="4" BorderBrush="AliceBlue" BorderThickness="2" Margin="0,5,0,0">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition/>
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="40"/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<iconPacks:PackIconOcticons Kind="Organization" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								<CheckBox Content="受令单位" Grid.Column="1"/>
+								<TextBox Margin="0,5,0,0" Style="{x:Null}" Height="18" Grid.Column="1" Grid.Row="1" Width="150" HorizontalAlignment="Left"/>
+							</Grid>
+						</Border>
+						<Border Grid.Row="5" BorderBrush="AliceBlue" BorderThickness="2" Margin="0,5,0,0">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition/>
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="40"/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<iconPacks:PackIconModern Kind="Newspaper" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								<CheckBox Content="命令标题或内容关键字" Grid.Column="1"/>
+								<TextBox Margin="0,5,0,0" Style="{x:Null}" Height="18" Grid.Column="1" Grid.Row="1" Width="150" HorizontalAlignment="Left"/>
+							</Grid>
+						</Border>
+						<Grid Grid.Row="6" Margin="10,5,0,0">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="auto"/>
+								<ColumnDefinition/>
+							</Grid.ColumnDefinitions>
+							<StackPanel Margin="5,0,0,0">
+								<CheckBox Content="只显示已签收的"/>
+								<CheckBox Content="只显示本台命令" Margin="0,5,0,0"/>
+							</StackPanel>
+							<StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0">
+								<Button Content="统计" Height="1"/>
+								<Button Content="查询" Height="1" Margin="10,0,0,0"/>
+								<Button Content="清除" Height="1" Margin="10,0,0,0"/>
+							</StackPanel>
+						</Grid>
+						<DataGrid Grid.Row="7" Margin="0,30,0,0">
+							<DataGrid.Columns>
+								<DataGridTextColumn Header="命令号"/>
+								<DataGridTextColumn Header="命令类型标题"/>
+							</DataGrid.Columns>
+						</DataGrid>
+					</Grid>
 				</TabItem>
 				<TabItem Header="参数设置" Controls:ControlsHelper.HeaderFontSize="15">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition MaxHeight="300"/>
+							<RowDefinition Height="60"/>
+							<RowDefinition Height="25"/>
+						</Grid.RowDefinitions>
+						<DataGrid>
+							<DataGrid.Columns>
+								<DataGridTextColumn Header="参数值"/>
+								<DataGridTextColumn Header="参数名"/>
+							</DataGrid.Columns>
+						</DataGrid>
+						<UniformGrid Rows="2" Columns="1" Grid.Row="1">
+							<StackPanel Orientation="Horizontal">
+								<Label Content="存取数据方式:" VerticalAlignment="Center"/>
+								<CheckBox Content="文件"/>
+								<CheckBox Content="数据库"/>
+							</StackPanel>
+							<StackPanel Orientation="Horizontal" Margin="85,0,0,0">
+								<CheckBox Content="仅用于查询"/>
+								<CheckBox Content="设置连接数据库参数"/>
+							</StackPanel>
+						</UniformGrid>
+						<StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+							<Button Content="确定"/>
+							<Button Content="取消"/>
+						</StackPanel>
+					</Grid>
 				</TabItem>
 			</TabControl>
 
@@ -211,7 +386,9 @@
 						<Label Content="受令列表" VerticalAlignment="Center"/>
 						<CheckBox Content="全选" Grid.Column="1"/>
 						<Button Content="按组选站" Grid.Column="2" HorizontalAlignment="Center"/>
-						<Button Content="^" Grid.Column="3" HorizontalAlignment="Right"/>
+						<Button Grid.Column="3" HorizontalAlignment="Right">
+							<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
+						</Button>
 					</Grid>
 					<DataGrid Grid.Row="1">
 						<DataGrid.Columns>
