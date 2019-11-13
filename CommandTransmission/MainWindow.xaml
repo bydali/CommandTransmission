@@ -2,6 +2,7 @@
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+					  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                       Title="MainWindow"
 					  xmlns:prism="http://prismlibrary.com/"
 					  prism:ViewModelLocator.AutoWireViewModel="True"
@@ -13,10 +14,14 @@
 		</Grid.RowDefinitions>
 		<Grid>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="0.3*"/>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition />
-				<ColumnDefinition Width="0.3*"/>
 			</Grid.ColumnDefinitions>
+			<GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
+			<GridSplitter Grid.Column="3" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 			<TabControl>
 				<TabItem Header="操作" Controls:ControlsHelper.HeaderFontSize="15">
 					<Grid>
@@ -102,39 +107,271 @@
 				</TabItem>
 			</TabControl>
 
-			<Grid Grid.Column="1">
+			<Grid Grid.Column="2">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="0.2*"/>
+					<RowDefinition Height="180"/>
 					<RowDefinition/>
-					<RowDefinition Height="0.2*"/>
+					<RowDefinition Height="210"/>
 				</Grid.RowDefinitions>
 				<TabControl>
 					<TabItem Header="调度命令" Controls:ControlsHelper.HeaderFontSize="15">
-						
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+							</Grid.RowDefinitions>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="60"/>
+								<ColumnDefinition Width="0.2*"/>
+								<ColumnDefinition Width="80"/>
+								<ColumnDefinition Width="0.2*"/>
+								<ColumnDefinition Width="70"/>
+								<ColumnDefinition Width="0.2*"/>
+							</Grid.ColumnDefinitions>
+							<Label Content="命令标题"/>
+							<Label Content="命令号" Grid.Row="1"/>
+							<Label Content="发令时间" Grid.Row="2"/>
+							<Label Content="授权时间" Grid.Row="3"/>
+							<Label Content="定稿时间" Grid.Row="4"/>
+							<Label Content="起草时间" Grid.Row="5"/>
+							<Label Content="中转原命令号" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="2"/>
+							<Label Content="发令人" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="2"/>
+							<Label Content="值班主任" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="2"/>
+							<Label Content="复颂人" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="2"/>
+							<Label Content="拟令人" HorizontalAlignment="Right" Grid.Row="5" Grid.Column="2"/>
+							<Label Content="当前状态" Grid.Row="1" Grid.Column="4"/>
+							<Label Content="发令单位" Grid.Row="2" Grid.Column="4"/>
+							<Label Content="授权状态" Grid.Row="3" Grid.Column="4"/>
+							<CheckBox Content="需值班主任授权" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"/>
+							<Label Content="命令分类" Grid.Row="5" Grid.Column="4"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.ColumnSpan="5" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="1" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="2" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="3" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="4" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="5" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="3" Grid.Row="1" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="3" Grid.Row="2" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="3" Grid.Row="3" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="3" Grid.Row="4" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="3" Grid.Row="5" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="5" Grid.Row="2" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="5" Grid.Row="3" Height="18"/>
+							<ListBox Grid.Column="5" Grid.Row="1">
+								<ListBoxItem Content="编辑"/>
+							</ListBox>
+							<ListBox Grid.Column="5" Grid.Row="5">
+								<ListBoxItem Content="行车命令"/>
+							</ListBox>
+						</Grid>
 					</TabItem>
 				</TabControl>
 				<TabControl Grid.Row="1">
 					<TabItem Header="详细内容" Controls:ControlsHelper.HeaderFontSize="15">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="25"/>
+								<RowDefinition/>
+							</Grid.RowDefinitions>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="0.25*"/>
+									<ColumnDefinition Width="0.25*"/>
+									<ColumnDefinition Width="0.25*"/>
+									<ColumnDefinition Width="0.25*"/>
+								</Grid.ColumnDefinitions>
+								<Button Content="正文字体" Width="50"/>
+								<Button Content="修改或新增处的字体" Grid.Column="1" Width="100"/>
+								<CheckBox Content="草稿" Grid.Column="2"/>
+								<Button Content="查看回执记录" Grid.Column="3" HorizontalAlignment="Right" Width="80"/>
+							</Grid>
+							<GroupBox Header="命令内容" Grid.Row="1">
+								<Label Content="准许 _________ 次列车在 ___________ 站停运，__________ 站至 __________ 站间加开 _________ 次列车，按现时分运行。"/>
+							</GroupBox>
+						</Grid>
 					</TabItem>
 				</TabControl>
+				<Grid Grid.Row="2">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="25"/>
+						<RowDefinition/>
+						<RowDefinition Height="30"/>
+					</Grid.RowDefinitions>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="60"/>
+							<ColumnDefinition Width="60"/>
+							<ColumnDefinition Width="0.5*"/>
+							<ColumnDefinition/>
+						</Grid.ColumnDefinitions>
+						<Label Content="受令列表" VerticalAlignment="Center"/>
+						<CheckBox Content="全选" Grid.Column="1"/>
+						<Button Content="按组选站" Grid.Column="2" HorizontalAlignment="Center"/>
+						<Button Content="^" Grid.Column="3" HorizontalAlignment="Right"/>
+					</Grid>
+					<DataGrid Grid.Row="1">
+						<DataGrid.Columns>
+							<DataGridTextColumn Header="选中"/>
+							<DataGridTextColumn Header="受令单位"/>
+							<DataGridTextColumn Header="抄送"/>
+							<DataGridTextColumn Header="签收状态"/>
+							<DataGridTextColumn Header=""/>
+							<DataGridTextColumn Header="签收人"/>
+							<DataGridTextColumn Header="签收时间"/>
+						</DataGrid.Columns>
+					</DataGrid>
+					<Grid Grid.Row="2">
+						<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+							<Button Content="缓存"/>
+							<Button Content="打印" Margin="20,0,0,0"/>
+							<Button Content="下达" Margin="20,0,0,0"/>
+							<Button Content="代签" Margin="20,0,0,0"/>
+							<Button Content="关闭" Margin="20,0,0,0"/>
+						</StackPanel>
+					</Grid>
+				</Grid>
 			</Grid>
 
-			<Grid Grid.Column="2">
+			<Grid Grid.Column="4">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="0.3*"/>
 					<RowDefinition/>
-					<RowDefinition Height="0.1*"/>
+					<RowDefinition Height="0.2*"/>
 				</Grid.RowDefinitions>
 				<TabControl>
 					<TabItem Header="常用词汇" Controls:ControlsHelper.HeaderFontSize="15">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="25"/>
+								<RowDefinition/>
+								<RowDefinition Height="25"/>
+							</Grid.RowDefinitions>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition/>
+									<ColumnDefinition/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<Label Content="词汇分类" HorizontalAlignment="Right"/>
+								<ListBox Grid.Column="1">
+									<ListBoxItem Content="word1"/>
+								</ListBox>
+								<Button Grid.Column="2" Width="25">
+									<iconPacks:Material Kind="Wrench" Width="10" Height="10"/>
+								</Button>
+							</Grid>
+							<ListBox Grid.Row="1">
+								<ListBoxItem Content="test1"/>
+								<ListBoxItem Content="test0"/>
+								<ListBoxItem Content="转交司机"/>
+							</ListBox>
+							<StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+								<Button>
+									<iconPacks:Material Kind="Export" Width="10" Height="10"/>
+								</Button>
+								<TextBox Style="{x:Null}" Grid.Column="1" Width="100" Height="18" Margin="10,0,0,0"/>
+								<Button Grid.Column="2" Margin="10,0,0,0">
+									<iconPacks:Material Kind="Plus" Width="10" Height="10"/>
+								</Button>
+								<Button Grid.Column="3" Margin="10,0,0,0">
+									<iconPacks:FontAwesome Kind="TimesSolid" Width="10" Height="10"/>
+								</Button>
+								<Button Grid.Column="4" Margin="10,0,0,0">
+									<iconPacks:Material Kind="ContentSave" Width="10" Height="10"/>
+								</Button>
+							</StackPanel>
+						</Grid>
 					</TabItem>
 				</TabControl>
 				<TabControl Grid.Row="1">
 					<TabItem Header="无线受令列表" Controls:ControlsHelper.HeaderFontSize="15">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="130"/>
+								<RowDefinition/>
+								<RowDefinition Height="25"/>
+							</Grid.RowDefinitions>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition/>
+									<RowDefinition/>
+									<RowDefinition/>
+									<RowDefinition/>
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<Label Content="命令类型" HorizontalAlignment="Right"/>
+								<Label Content="中转站" Grid.Row="1" HorizontalAlignment="Right"/>
+								<Label Content="车次" Grid.Row="2" HorizontalAlignment="Right"/>
+								<Label Content="机车号" Grid.Row="3" HorizontalAlignment="Right"/>
+								<Button Content="查找机车" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+								<ListBox Grid.Column="1" HorizontalAlignment="Left">
+									<ListBoxItem Content="调度命令"/>
+								</ListBox>
+								<ListBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left">
+									<ListBoxItem Content="GSM-R 发送"/>
+								</ListBox>
+								<TextBox Grid.Row="2" Grid.Column="1" Style="{x:Null}" Width="100" HorizontalAlignment="Left"/>
+								<TextBox Grid.Row="3" Grid.Column="1" Style="{x:Null}" Width="100" HorizontalAlignment="Left"/>
+							</Grid>
+							<DataGrid Grid.Row="1">
+								<DataGrid.Columns>
+									<DataGridTextColumn Header="车次号"/>
+									<DataGridTextColumn Header="机车号"/>
+									<DataGridTextColumn Header="中转站"/>
+									<DataGridTextColumn Header=""/>
+									<DataGridTextColumn Header="签收状态"/>
+									<DataGridTextColumn Header="签收人"/>
+									<DataGridTextColumn Header="签收时间"/>
+								</DataGrid.Columns>
+							</DataGrid>
+							<StackPanel Orientation="Horizontal" Grid.Row="2">
+								<RadioButton Content="智能发送"/>
+								<RadioButton Content="立即发送"/>
+								<Button Style="{x:Null}">
+									<StackPanel Orientation="Horizontal">
+										<Label>
+											<iconPacks:Material Kind="Plus" Width="10" Height="10"/>
+										</Label>
+										<Label Content="增加"/>
+									</StackPanel>
+								</Button>
+								<Button Style="{x:Null}">
+									<StackPanel Orientation="Horizontal">
+										<Label>
+											<iconPacks:FontAwesome Kind="TimesSolid" Width="10" Height="10"/>
+										</Label>
+										<Label Content="删除"/>
+									</StackPanel>
+								</Button>
+							</StackPanel>
+						</Grid>
 					</TabItem>
 				</TabControl>
 				<TabControl Grid.Row="2">
 					<TabItem Header="列控限速" Controls:ControlsHelper.HeaderFontSize="15">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition/>
+								<RowDefinition/>
+							</Grid.RowDefinitions>
+							<UniformGrid Rows="1" Columns="3" HorizontalAlignment="Center">
+								<Button Content="新建列控"/>
+								<Button Content="编辑修改"/>
+								<Button Content="命令校验"/>
+							</UniformGrid>
+							<UniformGrid Rows="1" Columns="2" Grid.Row="1" HorizontalAlignment="Center">
+								<Button Content="显示内容"/>
+								<Button Content="限速管理"/>
+							</UniformGrid>
+						</Grid>
 					</TabItem>
 				</TabControl>
 			</Grid>

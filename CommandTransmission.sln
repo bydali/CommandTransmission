@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTransmission", "Comm
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{C735BA55-49DD-4018-A892-9C896959A75C}"
 	ProjectSection(SolutionItems) = preProject
+		Libs\ControlzEx.dll = Libs\ControlzEx.dll
+		Libs\MahApps.Metro.IconPacks.dll = Libs\MahApps.Metro.IconPacks.dll
 		Libs\Microsoft.Practices.ServiceLocation.dll = Libs\Microsoft.Practices.ServiceLocation.dll
 		Libs\Microsoft.Practices.Unity.Configuration.dll = Libs\Microsoft.Practices.Unity.Configuration.dll
 		Libs\Microsoft.Practices.Unity.dll = Libs\Microsoft.Practices.Unity.dll
