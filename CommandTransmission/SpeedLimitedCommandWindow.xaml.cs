@@ -10,26 +10,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MahApps.Metro.Controls;
 
 namespace CommandTransmission
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// SpeedLimitedCommand.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : MetroWindow
+    public partial class SpeedLimitedCommandWindow : Window
     {
-        public MainWindow()
+        public SpeedLimitedCommandWindow()
         {
             InitializeComponent();
-        }
-
-        private void CreateCommand(object sender, RoutedEventArgs e)
-        {
-            SpeedLimitedCommandWindow window = new SpeedLimitedCommandWindow();
-            window.ShowDialog();
         }
     }
 }

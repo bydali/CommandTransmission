@@ -1,0 +1,93 @@
+﻿<Window x:Class="CommandTransmission.SpeedLimitedCommandWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CommandTransmission"
+        mc:Ignorable="d"
+        Title="SpeedLimitedCommand" Height="450" Width="600">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+			<ColumnDefinition Width="150"/>
+		</Grid.ColumnDefinitions>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+			<GroupBox Header="基本项" Grid.ColumnSpan="2">
+				<StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="限速原因"/>
+						<ListBox Margin="20,0,0,0" Width="100">
+						</ListBox>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+						<Label Content="命令类型"/>
+						<ListBox Margin="20,0,0,0" Width="100">
+						</ListBox>
+						<Label Content="车站"/>
+						<ListBox Margin="20,0,0,0" Width="100">
+						</ListBox>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+						<Label Content="线路"/>
+						<ListBox Margin="45,0,0,0" Width="150">
+						</ListBox>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+						<Label Content="开始公里标"/>
+						<TextBox Style="{x:Null}" Width="50" Margin="8,0,0,0"/>
+						<ListBox Margin="20,0,0,0" Width="40">
+						</ListBox>
+						<Label Content="Km+"/>
+						<TextBox Style="{x:Null}" Width="50" Margin="8,0,0,0"/>
+						<ListBox Margin="20,0,0,0" Width="40">
+						</ListBox>
+						<Label Content="m"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+						<Label Content="结束公里标"/>
+						<TextBox Style="{x:Null}" Width="50" Margin="8,0,0,0"/>
+						<ListBox Margin="20,0,0,0" Width="40">
+						</ListBox>
+						<Label Content="Km+"/>
+						<TextBox Style="{x:Null}" Width="50" Margin="8,0,0,0"/>
+						<ListBox Margin="20,0,0,0" Width="40">
+						</ListBox>
+						<Label Content="m"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+						<Label Content="限速值Km/h"/>
+						<ListBox Margin="20,0,0,0" Width="80">
+						</ListBox>
+						<CheckBox Content="取消限速"/>
+					</StackPanel>
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Grid.Row="1" Header="开始时间">
+				<StackPanel>
+					<CheckBox Content="定时开始" Margin="0,0,0,10"/>
+					<TextBox Style="{x:Null}" Width="150" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+					<RadioButton Content="立即执行"/>
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Grid.Row="1" Grid.Column="1" Header="结束时间">
+				<StackPanel>
+					<CheckBox Content="定时结束" Margin="0,0,0,10"/>
+					<TextBox Style="{x:Null}" Width="150" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+					<RadioButton Content="持久有效"/>
+				</StackPanel>
+			</GroupBox>
+		</Grid>
+		<StackPanel Grid.Column="1" VerticalAlignment="Center">
+			<Button Content="确定" Margin="0,0,0,50"/>
+			<Button Content="取消"/>
+		</StackPanel>
+	</Grid>
+</Window>

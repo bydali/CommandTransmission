@@ -14,11 +14,11 @@
 		</Grid.RowDefinitions>
 		<Grid>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition/>
+				<ColumnDefinition Width="0.3*"/>
 				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition/>
 				<ColumnDefinition Width="auto"/>
-				<ColumnDefinition />
+				<ColumnDefinition Width="0.3*"/>
 			</Grid.ColumnDefinitions>
 			<GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 			<GridSplitter Grid.Column="3" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
@@ -540,7 +540,7 @@
 								<RowDefinition/>
 							</Grid.RowDefinitions>
 							<UniformGrid Rows="1" Columns="3" HorizontalAlignment="Center">
-								<Button Content="新建列控"/>
+								<Button Content="新建列控" Click="CreateCommand"/>
 								<Button Content="编辑修改"/>
 								<Button Content="命令校验"/>
 							</UniformGrid>
