@@ -1,0 +1,54 @@
+﻿<Window x:Class="CommandTransmission.SpeedCommandManageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CommandTransmission"
+        mc:Ignorable="d"
+        Title="SpeedCommandManageWindow" Height="450" Width="800"
+		xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls">
+    <Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition Height="150"/>
+		</Grid.RowDefinitions>
+		<TabControl>
+			<TabItem Header="全部命令" Controls:ControlsHelper.HeaderFontSize="20">
+				<DataGrid>
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="调度命令"/>
+						<DataGridTextColumn Header="侧线限速站"/>
+						<DataGridTextColumn Header="限速线路"/>
+						<DataGridTextColumn Header="开始公里标"/>
+						<DataGridTextColumn Header="结束公里标"/>
+						<DataGridTextColumn Header="限速值"/>
+						<DataGridTextColumn Header="计划开始时间"/>
+						<DataGridTextColumn Header="计划结束时间"/>
+						<DataGridTextColumn Header="状态"/>
+						<DataGridTextColumn Header="备注"/>
+					</DataGrid.Columns>
+				</DataGrid>
+			</TabItem>
+			<TabItem Header="已设置" Controls:ControlsHelper.HeaderFontSize="20">
+			</TabItem>
+			<TabItem Header="已激活" Controls:ControlsHelper.HeaderFontSize="20">
+			</TabItem>
+			<TabItem Header="已拟定" Controls:ControlsHelper.HeaderFontSize="20">
+			</TabItem>
+		</TabControl>
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="100"/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+			<StackPanel Grid.Column="1">
+				<Button Content="刷新"/>
+				<Button Content="激活校验"/>
+				<Button Content="执行"/>
+				<Button Content="删除"/>
+				<Button Content="初始化"/>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</Window>

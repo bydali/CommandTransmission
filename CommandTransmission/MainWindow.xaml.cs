@@ -31,5 +31,11 @@ namespace CommandTransmission
             SpeedLimitedCommandWindow window = new SpeedLimitedCommandWindow();
             window.ShowDialog();
         }
+
+        private void SpeedManage(object sender, RoutedEventArgs e)
+        {
+            SpeedCommandManageWindow window = new SpeedCommandManageWindow();
+            window.ShowDialog();
+        }
     }
 }

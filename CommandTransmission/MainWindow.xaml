@@ -286,7 +286,7 @@
 				<Grid.RowDefinitions>
 					<RowDefinition Height="180"/>
 					<RowDefinition/>
-					<RowDefinition Height="210"/>
+					<RowDefinition Height="250"/>
 				</Grid.RowDefinitions>
 				<TabControl>
 					<TabItem Header="调度命令" Controls:ControlsHelper.HeaderFontSize="15">
@@ -536,17 +536,17 @@
 					<TabItem Header="列控限速" Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
 							<Grid.RowDefinitions>
-								<RowDefinition/>
-								<RowDefinition/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
 							</Grid.RowDefinitions>
-							<UniformGrid Rows="1" Columns="3" HorizontalAlignment="Center">
+							<UniformGrid Rows="1" Columns="3" HorizontalAlignment="Center" Margin="0,0,0,10">
 								<Button Content="新建列控" Click="CreateCommand"/>
 								<Button Content="编辑修改"/>
 								<Button Content="命令校验"/>
 							</UniformGrid>
 							<UniformGrid Rows="1" Columns="2" Grid.Row="1" HorizontalAlignment="Center">
 								<Button Content="显示内容"/>
-								<Button Content="限速管理"/>
+								<Button Content="限速管理" Click="SpeedManage"/>
 							</UniformGrid>
 						</Grid>
 					</TabItem>
