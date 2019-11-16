@@ -49,6 +49,15 @@
 				<Button Content="删除"/>
 				<Button Content="初始化"/>
 			</StackPanel>
+			<DataGrid Grid.Column="2">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="级别"/>
+					<DataGridTextColumn Header="命令号"/>
+					<DataGridTextColumn Header="描述"/>
+					<DataGridTextColumn Header="有效时间"/>
+					<DataGridTextColumn Header="备注"/>
+				</DataGrid.Columns>
+			</DataGrid>
 		</Grid>
 	</Grid>
 </Window>
