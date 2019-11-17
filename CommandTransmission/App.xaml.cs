@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommandTransmission.IO;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -19,6 +20,8 @@ namespace CommandTransmission
 
             var bootstrapper = new Bootstrapper();
             bootstrapper.Run();
+
+            WriteToPort.SendMsg();
         }
     }
 }
