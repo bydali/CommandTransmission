@@ -11,23 +11,22 @@ namespace CommandTransmission.IO
     {
         public static void SendMsg()
         {
-            //int i = 0;
-            //while (true)
-            //{
-            //    var factory = new ConnectionFactory() { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin", VirtualHost = "/" };
-            //    using (var connection = factory.CreateConnection())
-            //    using (var channel = connection.CreateModel())
-            //    {
-            //        channel.ExchangeDeclare(exchange: "",
-            //                                type: "topic");
-            //        var body = Encoding.UTF8.GetBytes(i.ToString());
-            //        channel.BasicPublish(exchange: "topic_logs",
-            //                             routingKey: "anonymous.info",
-            //                             basicProperties: null,
-            //                             body: body);
-            //        Console.WriteLine("asfd");
-            //    }
-            //}
+            ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", UserName = "admin", Password = "admin", VirtualHost = "/" };
+            using (IConnection conn = factory.CreateConnection())
+            {
+                using (IModel im = conn.CreateModel())
+                {
+                    im.ExchangeDeclare("rabbitmq_route", ExchangeType.Direct);
+                    im.QueueDeclare("rabbitmq_query", false, false, false, null);
+                    im.QueueBind("rabbitmq_query", "rabbitmq_route", ExchangeType.Direct, null);
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        byte[] message = Encoding.UTF8.GetBytes("Hello Lv");
+                        im.BasicPublish("rabbitmq_route", ExchangeType.Direct, null, message);
+                        Console.WriteLine("send:" + i);
+                    }
+                }
+            }
 
         }
 
