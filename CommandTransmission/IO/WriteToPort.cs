@@ -7,24 +7,25 @@ using System.Threading.Tasks;
 
 namespace CommandTransmission.IO
 {
-    public static class WriteToPort
+    class WriteToPort
     {
         public static void SendMsg()
         {
-            ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", UserName = "admin", Password = "admin", VirtualHost = "/" };
-            using (IConnection conn = factory.CreateConnection())
+            ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", UserName = "admin", Password = "admin" };
+            using (var connection = factory.CreateConnection())
             {
-                using (IModel im = conn.CreateModel())
+                using (var channel = connection.CreateModel())
                 {
-                    im.ExchangeDeclare("rabbitmq_route", ExchangeType.Direct);
-                    im.QueueDeclare("rabbitmq_query", false, false, false, null);
-                    im.QueueBind("rabbitmq_query", "rabbitmq_route", ExchangeType.Direct, null);
-                    for (int i = 0; i < 1000; i++)
-                    {
-                        byte[] message = Encoding.UTF8.GetBytes("Hello Lv");
-                        im.BasicPublish("rabbitmq_route", ExchangeType.Direct, null, message);
-                        Console.WriteLine("send:" + i);
-                    }
+                    channel.ExchangeDeclare("amq.topic", "topic", true, false, null);
+
+                    var routingKey = "q1";
+                    var message = "Hello World!";
+                    var body = Encoding.UTF8.GetBytes(message);
+                    channel.BasicPublish(exchange: "amq.topic",
+                                         routingKey: routingKey,
+                                         basicProperties: null,
+                                         body: body);
+                    Console.WriteLine("Sent {0}", message);
                 }
             }
 

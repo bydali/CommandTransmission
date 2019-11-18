@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Unity;
+﻿using CommandTransmission.IO;
+using Microsoft.Practices.Unity;
 using Prism.Logging;
 using Prism.Modularity;
 using Prism.Regions;
@@ -83,6 +84,9 @@ namespace CommandTransmission
         {
             base.InitializeModules();
             ((MainWindow)Shell).Show();
+
+            ReadFromPort.ReceiveMsg();
+            WriteToPort.SendMsg();
         }
     }
 }
