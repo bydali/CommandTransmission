@@ -167,6 +167,17 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libs\ControlzEx.dll" />
+    <Content Include="Libs\MahApps.Metro.IconPacks.dll" />
+    <Content Include="Libs\Microsoft.Practices.ServiceLocation.dll" />
+    <Content Include="Libs\Microsoft.Practices.Unity.Configuration.dll" />
+    <Content Include="Libs\Microsoft.Practices.Unity.dll" />
+    <Content Include="Libs\Microsoft.Practices.Unity.RegistrationByConvention.dll" />
+    <Content Include="Libs\Prism.dll" />
+    <Content Include="Libs\Prism.Unity.Wpf.dll" />
+    <Content Include="Libs\Prism.Wpf.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
