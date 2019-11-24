@@ -21,7 +21,6 @@ namespace CommandTransmission
             var bootstrapper = new Bootstrapper();
             bootstrapper.Run();
 
-            WriteToPort.SendMsg();
         }
     }
 }
