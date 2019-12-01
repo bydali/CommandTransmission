@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CommandTransmission.IO;
 using MahApps.Metro.Controls;
+using Prism.Events;
 
 namespace CommandTransmission
 {
@@ -21,9 +23,18 @@ namespace CommandTransmission
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        public MainWindow()
+        private IEventAggregator eventAggregator;
+        public MainWindow(IEventAggregator eventAggregator)
         {
             InitializeComponent();
+            this.eventAggregator = eventAggregator;
+            RegisterALLEvent();
+        }
+
+        private void RegisterALLEvent()
+        {
+
+            ReadFromPort.ReceiveMsg(eventAggregator);
         }
 
         private void CreateCommand(object sender, RoutedEventArgs e)

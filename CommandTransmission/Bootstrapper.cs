@@ -78,15 +78,13 @@ namespace CommandTransmission
 
         protected override void InitializeShell()
         {
+            base.InitializeShell();
         }
 
         protected override void InitializeModules()
         {
             base.InitializeModules();
             ((MainWindow)Shell).Show();
-
-            //ReadFromPort.ReceiveMsg();
-            //WriteToPort.SendMsg();
         }
     }
 }
