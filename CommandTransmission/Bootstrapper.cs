@@ -1,5 +1,4 @@
-﻿using CommandTransmission.IO;
-using Microsoft.Practices.Unity;
+﻿using Microsoft.Practices.Unity;
 using Prism.Logging;
 using Prism.Modularity;
 using Prism.Regions;
@@ -78,6 +77,7 @@ namespace CommandTransmission
 
         protected override void InitializeShell()
         {
+            base.InitializeShell();
         }
 
         protected override void InitializeModules()
