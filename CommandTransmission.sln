@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTransmission", "CommandTransmission\CommandTransmission.csproj", "{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YDMSG", "..\YDMSG\YDMSG\YDMSG.csproj", "{6E91F938-3123-4360-8447-948D4DA71881}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E91F938-3123-4360-8447-948D4DA71881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E91F938-3123-4360-8447-948D4DA71881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E91F938-3123-4360-8447-948D4DA71881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E91F938-3123-4360-8447-948D4DA71881}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

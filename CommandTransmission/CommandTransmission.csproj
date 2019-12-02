@@ -114,10 +114,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="IO\ReadFromLocal.cs" />
-    <Compile Include="IO\ReadFromPort.cs" />
-    <Compile Include="IO\WriteToLocal.cs" />
-    <Compile Include="IO\WriteToPort.cs" />
+    <Compile Include="IO.cs" />
     <Compile Include="SpeedCommandManageWindow.xaml.cs">
       <DependentUpon>SpeedCommandManageWindow.xaml</DependentUpon>
     </Compile>
@@ -199,7 +196,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Events\" />
-    <Folder Include="Message\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\YDMSG\YDMSG\YDMSG.csproj">
+      <Project>{6e91f938-3123-4360-8447-948d4da71881}</Project>
+      <Name>YDMSG</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

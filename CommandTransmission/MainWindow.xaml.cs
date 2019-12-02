@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using CommandTransmission.IO;
 using MahApps.Metro.Controls;
 using Prism.Events;
 
@@ -34,7 +33,7 @@ namespace CommandTransmission
         private void RegisterALLEvent()
         {
 
-            ReadFromPort.ReceiveMsg(eventAggregator);
+            IO.ReceiveMsg(eventAggregator);
         }
 
         private void CreateCommand(object sender, RoutedEventArgs e)

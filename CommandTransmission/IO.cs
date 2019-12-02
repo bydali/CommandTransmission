@@ -1,6 +1,5 @@
 ﻿using DSIM.Communications;
 using Prism.Events;
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommandTransmission.IO
+namespace CommandTransmission
 {
-    class ReadFromPort
+    class IO
     {
         private static IEventAggregator eventAggregator;
         private static MQHelper _mqHelper;
@@ -18,6 +17,7 @@ namespace CommandTransmission.IO
         public static void ReceiveMsg(IEventAggregator aggregator)
         {
             eventAggregator = aggregator;
+
             MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
             _mqHelper = new MQHelper
             {
@@ -30,5 +30,6 @@ namespace CommandTransmission.IO
         {
             eventAggregator.GetEvent<PubSubEvent<string>>().Publish("asdf");
         }
+
     }
 }
