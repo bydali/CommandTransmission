@@ -84,9 +84,6 @@ namespace CommandTransmission
         {
             base.InitializeModules();
             ((MainWindow)Shell).Show();
-
-            ReadFromPort.ReceiveMsg();
-            WriteToPort.SendMsg();
         }
     }
 }

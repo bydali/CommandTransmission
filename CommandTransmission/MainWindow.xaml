@@ -37,6 +37,7 @@
 								<StackPanel Orientation="Horizontal">
 									<Rectangle Fill="Green" Width="20" Height="20"/>
 									<Label Content="数据库正常" Margin="5,0,0,0"/>
+									<Controls:NumericUpDown Minimum="0" Maximum="24" Style="{x:Null}"/>
 									<Label Content="15:21:23" Margin="5,0,0,0"/>
 								</StackPanel>
 								<StackPanel Orientation="Horizontal">
