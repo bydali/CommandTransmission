@@ -3,10 +3,15 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
 					  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+					  xmlns:local="clr-namespace:CommandTransmission"
                       Title="MainWindow"
 					  xmlns:prism="http://prismlibrary.com/"
 					  prism:ViewModelLocator.AutoWireViewModel="True"
 					  >
+	<Controls:MetroWindow.Resources>
+		<local:CmdListVisible x:Key="cmdListVisible"/>
+		<local:CmdListRowHeight x:Key="cmdListRowHeight"/>
+	</Controls:MetroWindow.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition/>
@@ -27,10 +32,10 @@
 					<Grid>
 						<Grid.RowDefinitions>
 							<RowDefinition Height="80"/>
-							<RowDefinition/>
-							<RowDefinition/>
-							<RowDefinition/>
-							<RowDefinition/>
+							<RowDefinition Height="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}"/>
+							<RowDefinition Height="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}"/>
+							<RowDefinition Height="{Binding ElementName=sendingToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}"/>
+							<RowDefinition Height="{Binding ElementName=sendToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}"/>
 						</Grid.RowDefinitions>
 						<Grid>
 							<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -50,11 +55,11 @@
 						<StackPanel Orientation="Vertical" Grid.Row="1">
 							<Grid>
 								<Label Content="缓存命令" HorizontalAlignment="Center"/>
-								<Button Width="30" HorizontalAlignment="Right">
+								<ToggleButton Name="cacheToggle" Width="30" HorizontalAlignment="Right">
 									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
-								</Button>
+								</ToggleButton>
 							</Grid>
-							<DataGrid>
+							<DataGrid Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号" Width="50"/>
 									<DataGridTextColumn Header="命令标题"/>
@@ -65,11 +70,11 @@
 						<StackPanel Orientation="Vertical" Grid.Row="2">
 							<Grid>
 								<Label Content="接收命令" HorizontalAlignment="Center"/>
-								<Button Width="30" HorizontalAlignment="Right">
+								<ToggleButton Name="receiveToggle" Width="30" HorizontalAlignment="Right">
 									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
-								</Button>
+								</ToggleButton>
 							</Grid>
-							<DataGrid>
+							<DataGrid Visibility="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号" Width="50"/>
 									<DataGridTextColumn Header="命令标题"/>
@@ -80,11 +85,11 @@
 						<StackPanel Orientation="Vertical" Grid.Row="3">
 							<Grid>
 								<Label Content="发送命令" HorizontalAlignment="Center"/>
-								<Button Width="30" HorizontalAlignment="Right">
+								<ToggleButton Name="sendingToggle" Width="30" HorizontalAlignment="Right">
 									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
-								</Button>
+								</ToggleButton>
 							</Grid>
-							<DataGrid>
+							<DataGrid Visibility="{Binding ElementName=sendingToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号" Width="50"/>
 									<DataGridTextColumn Header="命令标题"/>
@@ -95,11 +100,11 @@
 						<StackPanel Orientation="Vertical" Grid.Row="4">
 							<Grid>
 								<Label Content="已发命令" HorizontalAlignment="Center"/>
-								<Button Width="30" HorizontalAlignment="Right">
+								<ToggleButton Name="sendToggle" Width="30" HorizontalAlignment="Right">
 									<iconPacks:Material Kind="ArrowCollapseUp" Height="10" Width="10"/>
-								</Button>
+								</ToggleButton>
 							</Grid>
-							<DataGrid>
+							<DataGrid Visibility="{Binding ElementName=sendToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">>
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号" Width="50"/>
 									<DataGridTextColumn Header="命令标题"/>
@@ -365,7 +370,17 @@
 								<Button Content="查看回执记录" Grid.Column="3" HorizontalAlignment="Right" Width="80"/>
 							</Grid>
 							<GroupBox Header="命令内容" Grid.Row="1">
-								<Label Content="准许 _________ 次列车在 ___________ 站停运，__________ 站至 __________ 站间加开 _________ 次列车，按现时分运行。"/>
+								<RichTextBox
+									IsDocumentEnabled="True" TextChanged="RichTextBox_TextChanged">
+									<FlowDocument FontSize="15">
+										<Paragraph Padding="10" Name="test">
+											<Hyperlink NavigateUri="https://github.com/MahApps/MahApps.Metro">
+												<Run Text=""/>
+											</Hyperlink>
+											<Run>请从命令模板中选择</Run>
+										</Paragraph>
+									</FlowDocument>
+								</RichTextBox>
 							</GroupBox>
 						</Grid>
 					</TabItem>

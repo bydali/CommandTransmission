@@ -114,6 +114,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converter\SimpleConvert.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="SpeedCommandManageWindow.xaml.cs">
       <DependentUpon>SpeedCommandManageWindow.xaml</DependentUpon>
