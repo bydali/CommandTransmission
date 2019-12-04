@@ -329,7 +329,8 @@
 							<Label Content="授权状态" Grid.Row="3" Grid.Column="4"/>
 							<CheckBox Content="需值班主任授权" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"/>
 							<Label Content="命令分类" Grid.Row="5" Grid.Column="4"/>
-							<TextBox Style="{x:Null}" Grid.Column="1" Grid.ColumnSpan="5" Height="18"/>
+							<TextBox Style="{x:Null}" Grid.Column="1" Grid.ColumnSpan="4" Height="18"/>
+							<Button HorizontalAlignment="Left" Grid.Column="5" Content="命令模板" Margin="10,0,0,0" Click="CmdTemplateClick"/>
 							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="1" Height="18"/>
 							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="2" Height="18"/>
 							<TextBox Style="{x:Null}" Grid.Column="1" Grid.Row="3" Height="18"/>
@@ -360,13 +361,13 @@
 							</Grid.RowDefinitions>
 							<Grid>
 								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="0.25*"/>
+									<ColumnDefinition Width="0.2*"/>
 									<ColumnDefinition Width="0.25*"/>
 									<ColumnDefinition Width="0.25*"/>
 									<ColumnDefinition Width="0.25*"/>
 								</Grid.ColumnDefinitions>
-								<Button Content="正文字体" Width="50"/>
-								<Button Content="修改或新增处的字体" Grid.Column="1" Width="100"/>
+								<Button Content="正文字体" Width="50" HorizontalAlignment="Left"/>
+								<Button Content="修改或新增处的字体" HorizontalAlignment="Left" Grid.Column="1" Width="100"/>
 								<CheckBox Content="草稿" Grid.Column="2"/>
 								<Button Content="查看回执记录" Grid.Column="3" HorizontalAlignment="Right" Width="80"/>
 							</Grid>
@@ -431,7 +432,7 @@
 
 			<Grid Grid.Column="4">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="0.3*"/>
+					<RowDefinition Height="0.4*"/>
 					<RowDefinition/>
 					<RowDefinition Height="0.2*"/>
 				</Grid.RowDefinitions>
@@ -486,7 +487,7 @@
 							<Grid.RowDefinitions>
 								<RowDefinition Height="130"/>
 								<RowDefinition/>
-								<RowDefinition Height="25"/>
+								<RowDefinition Height="30"/>
 							</Grid.RowDefinitions>
 							<Grid>
 								<Grid.RowDefinitions>
@@ -505,14 +506,14 @@
 								<Label Content="车次" Grid.Row="2" HorizontalAlignment="Right"/>
 								<Label Content="机车号" Grid.Row="3" HorizontalAlignment="Right"/>
 								<Button Content="查找机车" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
-								<ListBox Grid.Column="1" HorizontalAlignment="Left">
+								<ListBox Grid.Column="1" HorizontalAlignment="Left" Width="100">
 									<ListBoxItem Content="调度命令"/>
 								</ListBox>
-								<ListBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left">
+								<ListBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Width="100">
 									<ListBoxItem Content="GSM-R 发送"/>
 								</ListBox>
-								<TextBox Grid.Row="2" Grid.Column="1" Style="{x:Null}" Width="100" HorizontalAlignment="Left"/>
-								<TextBox Grid.Row="3" Grid.Column="1" Style="{x:Null}" Width="100" HorizontalAlignment="Left"/>
+								<TextBox Grid.Row="2" Grid.Column="1" Style="{x:Null}" Height="18" Width="100" HorizontalAlignment="Left"/>
+								<TextBox Grid.Row="3" Grid.Column="1" Style="{x:Null}" Height="18" Width="100" HorizontalAlignment="Left"/>
 							</Grid>
 							<DataGrid Grid.Row="1">
 								<DataGrid.Columns>
@@ -531,7 +532,7 @@
 								<Button Style="{x:Null}">
 									<StackPanel Orientation="Horizontal">
 										<Label>
-											<iconPacks:Material Kind="Plus" Width="10" Height="10"/>
+											<iconPacks:Material Kind="Plus" Width="10"/>
 										</Label>
 										<Label Content="增加"/>
 									</StackPanel>
@@ -539,7 +540,7 @@
 								<Button Style="{x:Null}">
 									<StackPanel Orientation="Horizontal">
 										<Label>
-											<iconPacks:FontAwesome Kind="TimesSolid" Width="10" Height="10"/>
+											<iconPacks:FontAwesome Kind="TimesSolid" Width="10"/>
 										</Label>
 										<Label Content="删除"/>
 									</StackPanel>

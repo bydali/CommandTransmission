@@ -53,5 +53,11 @@ namespace CommandTransmission
         {
 
         }
+
+        private void CmdTemplateClick(object sender, RoutedEventArgs e)
+        {
+            CommandTemplateWindow window = new CommandTemplateWindow();
+            window.Show();
+        }
     }
 }

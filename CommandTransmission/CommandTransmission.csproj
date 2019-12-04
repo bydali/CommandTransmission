@@ -122,6 +122,7 @@
     <Compile Include="SpeedLimitedCommandWindow.xaml.cs">
       <DependentUpon>SpeedLimitedCommandWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\CmdTemplate.cs" />
     <Page Include="CommandTemplateWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -180,6 +181,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="CmdTemplate.xml" />
     <Content Include="Libs\ControlzEx.dll" />
     <Content Include="Libs\DSIM.Communications.dll" />
     <Content Include="Libs\EasyNetQ.dll" />

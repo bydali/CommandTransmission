@@ -5,17 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CommandTransmission"
         mc:Ignorable="d"
-        Title="CommandTemplateWindow" Height="450" Width="800">
-    <Grid>
+        Title="CommandTemplateWindow" Width="400">
+	<Window.Resources>
+		<HierarchicalDataTemplate DataType="{x:Type local:CmdTemplate}" ItemsSource="{Binding CmdList}">
+			<Label Content="{Binding Type}"/>
+		</HierarchicalDataTemplate>
+		<HierarchicalDataTemplate DataType="{x:Type local:Cmd}">
+			<Label Content="{Binding Name}"/>
+		</HierarchicalDataTemplate>
+	</Window.Resources>
+	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
 			<RowDefinition/>
 		</Grid.RowDefinitions>
-		<Label Content="维护命令类型"/>
-		<TreeView Grid.Row="1">
-			<TreeViewItem/>
-			<TreeViewItem/>
-			<TreeViewItem/>
-		</TreeView>
+		<CheckBox Content="维护命令类型" Margin="10,0,0,0"/>
+		<TreeView Grid.Row="1" ItemsSource="{Binding}"/>
 	</Grid>
 </Window>
