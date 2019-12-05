@@ -24,6 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -115,6 +117,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converter\SimpleConvert.cs" />
+    <Compile Include="Events\AllEvents.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="SpeedCommandManageWindow.xaml.cs">
       <DependentUpon>SpeedCommandManageWindow.xaml</DependentUpon>
@@ -123,6 +126,7 @@
       <DependentUpon>SpeedLimitedCommandWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\CmdTemplate.cs" />
+    <Compile Include="ViewModel\Station.cs" />
     <Page Include="CommandTemplateWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -181,7 +185,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CmdTemplate.xml" />
+    <Resource Include="Config\MyStations.xml" />
+    <Resource Include="Config\CmdTemplate.xml" />
+    <Resource Include="Config\CachedCmds.xml" />
+    <Resource Include="Config\SendCmds.xml" />
+    <Resource Include="Config\ReceivedCmds.xml" />
     <Content Include="Libs\ControlzEx.dll" />
     <Content Include="Libs\DSIM.Communications.dll" />
     <Content Include="Libs\EasyNetQ.dll" />
@@ -197,9 +205,7 @@
     <Content Include="Libs\Prism.Wpf.dll" />
     <Content Include="Libs\RabbitMQ.Client.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Events\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\YDMSG\YDMSG\YDMSG.csproj">
       <Project>{6e91f938-3123-4360-8447-948d4da71881}</Project>
@@ -207,6 +213,9 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>copy "$(SolutionDir)\CommandTransmission\Config\*" "$(TargetDir)"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

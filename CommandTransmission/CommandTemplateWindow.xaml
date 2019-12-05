@@ -4,14 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CommandTransmission"
+		xmlns:external="clr-namespace:YDMSG;assembly=YDMSG"
         mc:Ignorable="d"
         Title="CommandTemplateWindow" Width="400">
 	<Window.Resources>
 		<HierarchicalDataTemplate DataType="{x:Type local:CmdTemplate}" ItemsSource="{Binding CmdList}">
 			<Label Content="{Binding Type}"/>
 		</HierarchicalDataTemplate>
-		<HierarchicalDataTemplate DataType="{x:Type local:Cmd}">
-			<Label Content="{Binding Name}"/>
+		<HierarchicalDataTemplate DataType="{x:Type external:MsgYDCommand}">
+			<Label Content="{Binding Title}"/>
 		</HierarchicalDataTemplate>
 	</Window.Resources>
 	<Grid>
@@ -20,6 +21,6 @@
 			<RowDefinition/>
 		</Grid.RowDefinitions>
 		<CheckBox Content="维护命令类型" Margin="10,0,0,0"/>
-		<TreeView Grid.Row="1" ItemsSource="{Binding}"/>
+		<TreeView Grid.Row="1" ItemsSource="{Binding}" MouseDoubleClick="TreeView_MouseDoubleClick"/>
 	</Grid>
 </Window>

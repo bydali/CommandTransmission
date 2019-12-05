@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Prism.Events;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
+using YDMSG;
 
 namespace CommandTransmission
 {
@@ -21,10 +23,12 @@ namespace CommandTransmission
     /// </summary>
     public partial class CommandTemplateWindow : Window
     {
+        private IEventAggregator eventAggregator;
         private ObservableCollection<CmdTemplate> CmdTmp;
 
-        public CommandTemplateWindow()
+        public CommandTemplateWindow(IEventAggregator eventAggregator)
         {
+            this.eventAggregator = eventAggregator;
             GenerateTemplate();
             InitializeComponent();
         }
@@ -32,7 +36,7 @@ namespace CommandTransmission
         private void GenerateTemplate()
         {
             CmdTmp = new ObservableCollection<CmdTemplate>();
-            using (XmlReader reader = XmlReader.Create("..\\..\\CmdTemplate.xml"))
+            using (XmlReader reader = XmlReader.Create("CmdTemplate.xml"))
             {
                 while (!reader.EOF)
                 {
@@ -42,7 +46,9 @@ namespace CommandTransmission
                     }
                     else if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        CmdTmp.Last().CmdList.Add(new Cmd(reader.GetAttribute("name"), reader.GetAttribute("content")));
+                        CmdTmp.Last().CmdList.Add(new MsgYDCommand(
+                            reader.GetAttribute("title"),
+                            reader.GetAttribute("content")));
                     }
                     reader.Read();
                 }
@@ -50,5 +56,14 @@ namespace CommandTransmission
             DataContext = CmdTmp;
         }
 
+        private void TreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (((TreeView)sender).SelectedValue is MsgYDCommand)
+            {
+                var cmd = (MsgYDCommand)((TreeView)sender).SelectedValue;
+                eventAggregator.GetEvent<EditNewCommand>().
+                    Publish(cmd);
+            }
+        }
     }
 }
