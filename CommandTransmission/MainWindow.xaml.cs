@@ -40,6 +40,7 @@ namespace CommandTransmission
             InitialData();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
+            
         }
 
         private void InitialData()
@@ -52,7 +53,8 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        CachedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Target = reader.GetAttribute("target") });
+                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
+                        CachedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
                     }
                     reader.Read();
                 }
@@ -67,12 +69,13 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        SendCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Target = reader.GetAttribute("target") });
+                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
+                        SendCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
                     }
                     reader.Read();
                 }
             }
-            cachedCmdsDg.ItemsSource = CachedCmds;
+            sendCmdsDg.ItemsSource = SendCmds;
 
             // 初始化 接收命令
             ReceivedCmds = new ObservableCollection<MsgYDCommand>();
@@ -82,12 +85,13 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        ReceivedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Target = reader.GetAttribute("target") });
+                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
+                        ReceivedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
                     }
                     reader.Read();
                 }
             }
-            cachedCmdsDg.ItemsSource = CachedCmds;
+            receivedCmdsDg.ItemsSource = ReceivedCmds;
 
             // 初始化受令列表
             allStations = new ObservableCollection<Station>();

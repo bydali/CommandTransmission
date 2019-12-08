@@ -9,7 +9,7 @@
        source=""
        authorize-state=""
        need-authorize=""
-       target="赤壁北"
+       targets="赤壁北"
        content=""
        />
 </cached-cmds>
