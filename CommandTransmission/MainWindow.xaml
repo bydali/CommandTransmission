@@ -10,6 +10,7 @@
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
 		<local:CmdListRowHeight x:Key="cmdListRowHeight" />
+		<local:CmdTargets x:Key="cmdTargets"/>
 	</Controls:MetroWindow.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -88,12 +89,19 @@
 														Width="10" />
 								</ToggleButton>
 							</Grid>
+							<CheckBox Name="test"/>
 							<DataGrid Grid.Row="1"
 									  Name="cachedCmdsDg"
 									  IsReadOnly="True"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
+								<DataGrid.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="删除此缓存"/>
+										<MenuItem Header="删除所有缓存" />
+									</ContextMenu>
+								</DataGrid.ContextMenu>
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号"
 														Width="0.2*"
@@ -125,7 +133,7 @@
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  IsReadOnly="True"
-									  Name="sendCmdsDg"
+									  Name="receivedCmdsDg"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
@@ -163,12 +171,21 @@
 									  Visibility="{Binding ElementName=sendingToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号"
-														Width="0.2*" />
+														Width="0.2*"
+														Binding="{Binding CmdSN}" />
 									<DataGridTextColumn Header="命令标题"
-														Width="0.5*" />
+														Width="0.5*"
+														Binding="{Binding Title}" />
 									<DataGridTextColumn Header="目标站台"
-														Width="0.3*" />
+														Width="0.3*"
+														Binding="{Binding Targets,Converter={StaticResource ResourceKey=cmdTargets}}" />
 								</DataGrid.Columns>
+								<DataGrid.RowStyle>
+									<Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="DataGridRow">
+										<EventSetter Event="MouseDoubleClick"
+													 Handler="ChangeEdittingCmd" />
+									</Style>
+								</DataGrid.RowStyle>
 							</DataGrid>
 						</Grid>
 						<Grid Grid.Row="4">
@@ -189,7 +206,7 @@
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  IsReadOnly="True"
-									  Name="receivedCmdsDg"
+									  Name="sendCmdsDg"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=sendToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
@@ -576,11 +593,9 @@
 									 Grid.Row="1"
 									 Height="18" />
 							<Controls:DateTimePicker SelectedDate="{Binding CmdTime,Mode=TwoWay}"
-													 SelectedTime="{Binding CmdTime,Mode=TwoWay}"
 													 Grid.Column="1"
 													 Grid.Row="2" />
 							<Controls:DateTimePicker SelectedDate="{Binding AuthorizeTime,Mode=TwoWay}"
-													 SelectedTime="{Binding AuthorizeTime,Mode=TwoWay}"
 													 Grid.Column="1"
 													 Grid.Row="3" />
 							<TextBox Style="{x:Null}"
@@ -692,6 +707,8 @@
 						<Label Content="受令列表"
 							   VerticalAlignment="Center" />
 						<CheckBox Content="全选"
+								  Checked="SelectAllStations"
+								  Unchecked="CancelAllStations"
 								  Grid.Column="1" />
 						<Button Content="按组选站"
 								Grid.Column="2"
@@ -705,10 +722,12 @@
 					</Grid>
 					<DataGrid Name="allStationDg"
 							  AutoGenerateColumns="False"
-							  IsReadOnly="True"
 							  CanUserAddRows="False"
+							  ItemsSource="{Binding Targets}"
 							  Grid.Row="1">
 						<DataGrid.Columns>
+							<DataGridCheckBoxColumn Binding="{Binding IsSelected,Mode=TwoWay}"
+													Header="选中" />
 							<DataGridTextColumn Width="0.1*"
 												Header="受令单位"
 												Binding="{Binding Name}" />
@@ -717,9 +736,11 @@
 							<DataGridTextColumn Width="0.1*"
 												Header="签收状态" />
 							<DataGridTextColumn Width="0.2*"
-												Header="签收人" />
+												Header="签收人"
+												Binding="{Binding Signee}"/>
 							<DataGridTextColumn Width="0.3*"
-												Header="签收时间" />
+												Header="签收时间"
+												Binding="{Binding SignTime}" />
 						</DataGrid.Columns>
 					</DataGrid>
 					<Grid Grid.Row="2">

@@ -16,14 +16,16 @@ namespace CommandTransmission
 
         public static void ReceiveMsg(IEventAggregator aggregator)
         {
-            eventAggregator = aggregator;
+            //eventAggregator = aggregator;
 
-            MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
-            _mqHelper = new MQHelper
-            {
-                ClientSubscriptionId = ConfigurationManager.ConnectionStrings["ClientID"].ConnectionString
-            };
-            _mqHelper.MessageArrived += RabbitMQ_MessageArrived;
+            //MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
+            //_mqHelper = new MQHelper
+            //{
+            //    ClientSubscriptionId = ConfigurationManager.ConnectionStrings["ClientID"].ConnectionString
+            //};
+            //_mqHelper.MessageArrived += RabbitMQ_MessageArrived;
+
+
         }
 
         private static void RabbitMQ_MessageArrived(object sender, MsgCategoryEnum e)

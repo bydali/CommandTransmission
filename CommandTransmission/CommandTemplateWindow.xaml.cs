@@ -1,4 +1,5 @@
-﻿using Prism.Events;
+﻿using Newtonsoft.Json;
+using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,6 +36,19 @@ namespace CommandTransmission
 
         private void GenerateTemplate()
         {
+            ObservableCollection<Cmd2Station> allStations = new ObservableCollection<Cmd2Station>();
+            using (XmlReader reader = XmlReader.Create("MyStations.xml"))
+            {
+                while (!reader.EOF)
+                {
+                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "station")
+                    {
+                        allStations.Add(new Cmd2Station() { Name = reader.GetAttribute("name") });
+                    }
+                    reader.Read();
+                }
+            }
+
             CmdTmp = new ObservableCollection<CmdTemplate>();
             using (XmlReader reader = XmlReader.Create("CmdTemplate.xml"))
             {
@@ -48,7 +62,9 @@ namespace CommandTransmission
                     {
                         CmdTmp.Last().CmdList.Add(new MsgYDCommand(
                             reader.GetAttribute("title"),
-                            reader.GetAttribute("content")));
+                            reader.GetAttribute("content"),
+                            allStations
+                            ));
                     }
                     reader.Read();
                 }
@@ -61,8 +77,11 @@ namespace CommandTransmission
             if (((TreeView)sender).SelectedValue is MsgYDCommand)
             {
                 var cmd = (MsgYDCommand)((TreeView)sender).SelectedValue;
+                string json = JsonConvert.SerializeObject(cmd, new JsonSerializerSettings()
+                { PreserveReferencesHandling = PreserveReferencesHandling.All });
+                var cmd_copy = JsonConvert.DeserializeObject<MsgYDCommand>(json);
                 eventAggregator.GetEvent<EditNewCommand>().
-                    Publish(cmd);
+                    Publish(cmd_copy);
             }
         }
     }

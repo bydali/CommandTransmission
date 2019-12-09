@@ -30,7 +30,7 @@ namespace CommandTransmission
         private ObservableCollection<MsgYDCommand> CachedCmds;
         private ObservableCollection<MsgYDCommand> SendCmds;
         private ObservableCollection<MsgYDCommand> ReceivedCmds;
-        private ObservableCollection<Station> allStations;
+        private ObservableCollection<MsgYDCommand> SendingCmds;
 
         public MainWindow(IEventAggregator eventAggregator)
         {
@@ -40,11 +40,14 @@ namespace CommandTransmission
             InitialData();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
-            
+
         }
 
         private void InitialData()
         {
+            SendingCmds = new ObservableCollection<MsgYDCommand>();
+            sendingCmdsDg.ItemsSource = SendingCmds;
+
             // 初始化缓存命令
             CachedCmds = new ObservableCollection<MsgYDCommand>();
             using (XmlReader reader = XmlReader.Create("CachedCmds.xml"))
@@ -53,8 +56,9 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
-                        CachedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
+                        //var targets = reader.GetAttribute("targets").Split('\t');
+                        //string s = string.Join(",", targets);
+                        //CachedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
                     }
                     reader.Read();
                 }
@@ -69,8 +73,9 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
-                        SendCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
+                        //var targets = reader.GetAttribute("targets").Split('\t');
+                        //string s = string.Join(",", targets);
+                        //SendCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
                     }
                     reader.Read();
                 }
@@ -85,28 +90,14 @@ namespace CommandTransmission
                 {
                     if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        var targets = reader.GetAttribute("targets").Split('\t').ToList();
-                        ReceivedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = targets });
+                        //var targets = reader.GetAttribute("targets").Split('\t');
+                        //string s = string.Join(",", targets);
+                        //ReceivedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
                     }
                     reader.Read();
                 }
             }
             receivedCmdsDg.ItemsSource = ReceivedCmds;
-
-            // 初始化受令列表
-            allStations = new ObservableCollection<Station>();
-            using (XmlReader reader = XmlReader.Create("MyStations.xml"))
-            {
-                while (!reader.EOF)
-                {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "station")
-                    {
-                        allStations.Add(new Station() { Name = reader.GetAttribute("name") });
-                    }
-                    reader.Read();
-                }
-            }
-            allStationDg.ItemsSource = allStations;
         }
 
         private void RegisterALLEvent()
@@ -115,12 +106,24 @@ namespace CommandTransmission
             eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
         }
 
+        // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
         {
+            if (CmdEdittingGrid.DataContext != null)
+            {
+                var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+                Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
+                CmdParagraph.Inlines.CopyTo(tmp, 0);
+                cmd.Content = tmp;
+            }
+
+            //当前命令编辑的上下文数据
             CmdEdittingGrid.DataContext = data;
+            allStationDg.ItemsSource = data.Targets;
+
             CmdParagraph.Inlines.Clear();
 
-            var lst = data.Content.Split(new string[] { "***" }, StringSplitOptions.None);
+            var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
             for (int i = 0; i < lst.Length; i++)
             {
                 Run r = new Run(lst[i]);
@@ -129,10 +132,12 @@ namespace CommandTransmission
                 if (i != lst.Length - 1)
                 {
                     Hyperlink hl = new Hyperlink();
-                    hl.Inlines.Add(new Run("____"));
+                    hl.Inlines.Add(new Run("        "));
                     CmdParagraph.Inlines.Add(hl);
                 }
             }
+
+            SendingCmds.Insert(0, data);
         }
 
         private void CreateCommand(object sender, RoutedEventArgs e)
@@ -153,6 +158,45 @@ namespace CommandTransmission
             {
                 CommandTemplateWindow window = new CommandTemplateWindow(eventAggregator);
                 window.Show();
+            }
+        }
+
+        private void SelectAllStations(object sender, RoutedEventArgs e)
+        {
+            //if (CmdEdittingGrid.DataContext != null)
+            //{
+            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            //    allStationDg.SelectAll();
+            //    string s = string.Join(",", allStations.Select(i => { return i.Name; }));
+            //    cmd.Targets = s;
+            //}
+        }
+
+        private void CancelAllStations(object sender, RoutedEventArgs e)
+        {
+            //if (CmdEdittingGrid.DataContext != null)
+            //{
+            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            //    allStationDg.UnselectAll();
+            //    string s = null;
+            //    cmd.Targets = s;
+            //}
+        }
+
+        private void ChangeEdittingCmd(object sender, MouseButtonEventArgs e)
+        {
+            var cmd = (MsgYDCommand)((DataGridRow)sender).DataContext;
+
+            var cmdCurrent = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
+            CmdParagraph.Inlines.CopyTo(tmp, 0);
+            cmdCurrent.Content = tmp;
+
+            CmdEdittingGrid.DataContext = cmd;
+            CmdParagraph.Inlines.Clear();
+            foreach (var item in (Inline[])cmd.Content)
+            {
+                CmdParagraph.Inlines.Add(item);
             }
         }
     }
