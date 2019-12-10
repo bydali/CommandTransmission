@@ -78,8 +78,15 @@ namespace CommandTransmission
             {
                 var cmd = (MsgYDCommand)((TreeView)sender).SelectedValue;
                 string json = JsonConvert.SerializeObject(cmd, new JsonSerializerSettings()
-                { PreserveReferencesHandling = PreserveReferencesHandling.All });
-                var cmd_copy = JsonConvert.DeserializeObject<MsgYDCommand>(json);
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                });
+                var cmd_copy = JsonConvert.DeserializeObject<MsgYDCommand>(json, new JsonSerializerSettings()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                });
                 eventAggregator.GetEvent<EditNewCommand>().
                     Publish(cmd_copy);
             }
