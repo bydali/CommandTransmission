@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using MahApps.Metro.Controls;
+using Newtonsoft.Json;
 using Prism.Events;
 using YDMSG;
 
@@ -40,7 +41,6 @@ namespace CommandTransmission
             InitialData();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
-
         }
 
         private void InitialData()
@@ -175,6 +175,30 @@ namespace CommandTransmission
             {
                 CmdParagraph.Inlines.Add(item);
             }
+        }
+
+        private async void SendMsg(object sender, RoutedEventArgs e)
+        {
+            if (CmdEdittingGrid.DataContext != null)
+            {
+                var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+
+                try
+                {
+                    await Task.Run(() =>
+                                    {
+                                        string json = JsonConvert.SerializeObject(cmd);
+                                        IO.SendMsg(json);
+                                    });
+
+                    MessageBox.Show("消息已发送", "成功");
+                }
+                catch (Exception except)
+                {
+                    MessageBox.Show(except.Message, "失败");
+                }
+            }
+
         }
     }
 }
