@@ -502,7 +502,8 @@
 				</TabItem>
 			</TabControl>
 
-			<Grid Grid.Column="2">
+			<Grid Grid.Column="2"
+				  Name="CmdEdittingGrid">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="180" />
 					<RowDefinition />
@@ -511,7 +512,7 @@
 				<TabControl>
 					<TabItem Header="调度命令"
 							 Controls:ControlsHelper.HeaderFontSize="15">
-						<Grid Name="CmdEdittingGrid">
+						<Grid>
 							<Grid.RowDefinitions>
 								<RowDefinition Height="auto" />
 								<RowDefinition Height="auto" />
@@ -569,7 +570,7 @@
 								   Grid.Row="3"
 								   Grid.Column="4" />
 							<CheckBox Content="需值班主任授权"
-									  IsChecked="{Binding NeedAuthorize,Mode=TwoWay}"
+									  IsChecked="{Binding NeedAuthorize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									  Margin="5,0,0,0"
 									  Grid.Row="4"
 									  Grid.Column="4"
@@ -578,7 +579,7 @@
 								   Grid.Row="5"
 								   Grid.Column="4" />
 							<TextBox Style="{x:Null}"
-									 Text="{Binding Title,Mode=TwoWay}"
+									 Text="{Binding Title,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="1"
 									 Grid.ColumnSpan="4"
 									 Height="18" />
@@ -588,14 +589,14 @@
 									Margin="10,0,0,0"
 									Click="CmdTemplateClick" />
 							<TextBox Style="{x:Null}"
-									 Text="{Binding CmdSN,Mode=TwoWay}"
+									 Text="{Binding CmdSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="1"
 									 Grid.Row="1"
 									 Height="18" />
-							<Controls:DateTimePicker SelectedDate="{Binding CmdTime,Mode=TwoWay}"
+							<Controls:DateTimePicker SelectedDate="{Binding CmdTime,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													 Grid.Column="1"
 													 Grid.Row="2" />
-							<Controls:DateTimePicker SelectedDate="{Binding AuthorizeTime,Mode=TwoWay}"
+							<Controls:DateTimePicker SelectedDate="{Binding AuthorizeTime,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													 Grid.Column="1"
 													 Grid.Row="3" />
 							<TextBox Style="{x:Null}"
@@ -611,12 +612,12 @@
 									 Grid.Row="1"
 									 Height="18" />
 							<TextBox Style="{x:Null}"
-									 Text="{Binding CommanderSN,Mode=TwoWay}"
+									 Text="{Binding CommanderSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="3"
 									 Grid.Row="2"
 									 Height="18" />
 							<TextBox Style="{x:Null}"
-									 Text="{Binding DutyOfficer,Mode=TwoWay}"
+									 Text="{Binding DutyOfficer,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="3"
 									 Grid.Row="3"
 									 Height="18" />
@@ -629,11 +630,11 @@
 									 Grid.Row="5"
 									 Height="18" />
 							<TextBox Style="{x:Null}"
-									 Text="{Binding CmdUnit,Mode=TwoWay}"
+									 Text="{Binding CmdUnit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="5"
 									 Grid.Row="2"
 									 Height="18" />
-							<CheckBox IsChecked="{Binding AuthorizeState,Mode=TwoWay}"
+							<CheckBox IsChecked="{Binding AuthorizeState,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									  Grid.Column="5"
 									  Grid.Row="3"
 									  Height="18" />
@@ -707,8 +708,7 @@
 						<Label Content="受令列表"
 							   VerticalAlignment="Center" />
 						<CheckBox Content="全选"
-								  Checked="SelectAllStations"
-								  Unchecked="CancelAllStations"
+								  IsChecked="{Binding Is2AllStation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 								  Grid.Column="1" />
 						<Button Content="按组选站"
 								Grid.Column="2"
@@ -726,7 +726,7 @@
 							  ItemsSource="{Binding Targets}"
 							  Grid.Row="1">
 						<DataGrid.Columns>
-							<DataGridCheckBoxColumn Binding="{Binding IsSelected,Mode=TwoWay}"
+							<DataGridCheckBoxColumn Binding="{Binding IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													Header="选中" />
 							<DataGridTextColumn Width="0.1*"
 												Header="受令单位"
@@ -750,7 +750,8 @@
 							<Button Content="打印"
 									Margin="20,0,0,0" />
 							<Button Content="下达"
-									Margin="20,0,0,0" />
+									Margin="20,0,0,0" 
+									Click="SendMsg"/>
 							<Button Content="代签"
 									Margin="20,0,0,0" />
 							<Button Content="关闭"

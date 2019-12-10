@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using MahApps.Metro.Controls;
+using Newtonsoft.Json;
 using Prism.Events;
 using YDMSG;
 
@@ -40,7 +41,6 @@ namespace CommandTransmission
             InitialData();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
-
         }
 
         private void InitialData()
@@ -109,6 +109,7 @@ namespace CommandTransmission
         // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
         {
+            // 如果当前窗口有命令正在编辑，则显示保存该命令的内容
             if (CmdEdittingGrid.DataContext != null)
             {
                 var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
@@ -117,10 +118,8 @@ namespace CommandTransmission
                 cmd.Content = tmp;
             }
 
-            //当前命令编辑的上下文数据
+            //新命令的上下文数据
             CmdEdittingGrid.DataContext = data;
-            allStationDg.ItemsSource = data.Targets;
-
             CmdParagraph.Inlines.Clear();
 
             var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
@@ -161,28 +160,6 @@ namespace CommandTransmission
             }
         }
 
-        private void SelectAllStations(object sender, RoutedEventArgs e)
-        {
-            //if (CmdEdittingGrid.DataContext != null)
-            //{
-            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-            //    allStationDg.SelectAll();
-            //    string s = string.Join(",", allStations.Select(i => { return i.Name; }));
-            //    cmd.Targets = s;
-            //}
-        }
-
-        private void CancelAllStations(object sender, RoutedEventArgs e)
-        {
-            //if (CmdEdittingGrid.DataContext != null)
-            //{
-            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-            //    allStationDg.UnselectAll();
-            //    string s = null;
-            //    cmd.Targets = s;
-            //}
-        }
-
         private void ChangeEdittingCmd(object sender, MouseButtonEventArgs e)
         {
             var cmd = (MsgYDCommand)((DataGridRow)sender).DataContext;
@@ -198,6 +175,30 @@ namespace CommandTransmission
             {
                 CmdParagraph.Inlines.Add(item);
             }
+        }
+
+        private async void SendMsg(object sender, RoutedEventArgs e)
+        {
+            if (CmdEdittingGrid.DataContext != null)
+            {
+                var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+
+                try
+                {
+                    await Task.Run(() =>
+                                    {
+                                        string json = JsonConvert.SerializeObject(cmd);
+                                        IO.SendMsg(json);
+                                    });
+
+                    MessageBox.Show("消息已发送", "成功");
+                }
+                catch (Exception except)
+                {
+                    MessageBox.Show(except.Message, "失败");
+                }
+            }
+
         }
     }
 }
