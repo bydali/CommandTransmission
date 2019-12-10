@@ -109,6 +109,7 @@ namespace CommandTransmission
         // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
         {
+            // 如果当前窗口有命令正在编辑，则显示保存该命令的内容
             if (CmdEdittingGrid.DataContext != null)
             {
                 var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
@@ -117,10 +118,8 @@ namespace CommandTransmission
                 cmd.Content = tmp;
             }
 
-            //当前命令编辑的上下文数据
+            //新命令的上下文数据
             CmdEdittingGrid.DataContext = data;
-            allStationDg.ItemsSource = data.Targets;
-
             CmdParagraph.Inlines.Clear();
 
             var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
@@ -159,28 +158,6 @@ namespace CommandTransmission
                 CommandTemplateWindow window = new CommandTemplateWindow(eventAggregator);
                 window.Show();
             }
-        }
-
-        private void SelectAllStations(object sender, RoutedEventArgs e)
-        {
-            //if (CmdEdittingGrid.DataContext != null)
-            //{
-            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-            //    allStationDg.SelectAll();
-            //    string s = string.Join(",", allStations.Select(i => { return i.Name; }));
-            //    cmd.Targets = s;
-            //}
-        }
-
-        private void CancelAllStations(object sender, RoutedEventArgs e)
-        {
-            //if (CmdEdittingGrid.DataContext != null)
-            //{
-            //    var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-            //    allStationDg.UnselectAll();
-            //    string s = null;
-            //    cmd.Targets = s;
-            //}
         }
 
         private void ChangeEdittingCmd(object sender, MouseButtonEventArgs e)
