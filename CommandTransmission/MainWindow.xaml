@@ -69,6 +69,7 @@
 									<Button Content="刷新"
 											Margin="5,0,0,0" />
 									<Button Content="新建调度命令"
+											Click="CmdTemplateClick"
 											Margin="5,0,0,0" />
 								</StackPanel>
 							</StackPanel>
@@ -212,12 +213,22 @@
 									  Visibility="{Binding ElementName=sendToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号"
-														Width="0.2*" />
+														Width="0.2*"
+														Binding="{Binding CmdSN}" />
 									<DataGridTextColumn Header="命令标题"
-														Width="0.5*" />
+														Width="0.5*"
+														Binding="{Binding Title}" />
 									<DataGridTextColumn Header="目标站台"
-														Width="0.3*" />
+														Width="0.3*"
+														Binding="{Binding Targets,Converter={StaticResource ResourceKey=cmdTargets}}" />
 								</DataGrid.Columns>
+								<DataGrid.RowStyle>
+									<Style BasedOn="{StaticResource MetroDataGridRow}"
+										   TargetType="DataGridRow">
+										<EventSetter Event="MouseDoubleClick"
+													 Handler="ChangeEdittingCmd" />
+									</Style>
+								</DataGrid.RowStyle>
 							</DataGrid>
 						</Grid>
 					</Grid>
@@ -503,7 +514,8 @@
 			</TabControl>
 
 			<Grid Grid.Column="2"
-				  Name="CmdEdittingGrid">
+				  Name="CmdEdittingGrid"
+				  IsEnabled="{Binding IsEnable}">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="180" />
 					<RowDefinition />
@@ -583,11 +595,6 @@
 									 Grid.Column="1"
 									 Grid.ColumnSpan="4"
 									 Height="18" />
-							<Button HorizontalAlignment="Left"
-									Grid.Column="5"
-									Content="命令模板"
-									Margin="10,0,0,0"
-									Click="CmdTemplateClick" />
 							<TextBox Style="{x:Null}"
 									 Text="{Binding CmdSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="1"

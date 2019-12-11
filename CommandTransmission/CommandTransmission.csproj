@@ -206,7 +206,6 @@
     <Content Include="Libs\Prism.Wpf.dll" />
     <Content Include="Libs\RabbitMQ.Client.dll" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\YDMSG\YDMSG\YDMSG.csproj">
       <Project>{6e91f938-3123-4360-8447-948d4da71881}</Project>

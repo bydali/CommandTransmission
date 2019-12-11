@@ -18,8 +18,7 @@ namespace CommandTransmission
 
         public static async void ReceiveMsg(IEventAggregator aggregator)
         {
-            //eventAggregator = aggregator;
-
+            eventAggregator = aggregator;
             //MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
             //_mqHelper = new MQHelper
             //{

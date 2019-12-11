@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using Prism.Events;
 using YDMSG;
@@ -177,21 +178,49 @@ namespace CommandTransmission
             }
         }
 
+        private string Content2String(Paragraph p)
+        {
+            var content = "";
+            foreach (var item in p.Inlines)
+            {
+                if (item is Run)
+                {
+                    content += ((Run)item).Text;
+                }
+                if (item is Hyperlink)
+                {
+                    foreach (Run r in ((Hyperlink)item).Inlines)
+                    {
+                        content += r.Text;
+                    }
+                }
+            }
+            return content;
+        }
+
         private async void SendMsg(object sender, RoutedEventArgs e)
         {
             if (CmdEdittingGrid.DataContext != null)
             {
                 var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+                cmd.Content = Content2String(CmdParagraph); 
 
                 try
                 {
+                    var controller = await this.ShowProgressAsync("", "发送中……");
+                    controller.SetIndeterminate();
+
                     await Task.Run(() =>
                                     {
                                         string json = JsonConvert.SerializeObject(cmd);
                                         IO.SendMsg(json);
                                     });
 
-                    MessageBox.Show("消息已发送", "成功");
+                    await controller.CloseAsync();
+
+                    cmd.IsEnable = false;
+                    SendingCmds.Remove(cmd);
+                    SendCmds.Add(cmd);
                 }
                 catch (Exception except)
                 {
