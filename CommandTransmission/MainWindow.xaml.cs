@@ -203,13 +203,13 @@ namespace CommandTransmission
             if (CmdEdittingGrid.DataContext != null)
             {
                 var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-                cmd.Content = Content2String(CmdParagraph); 
+                cmd.Content = Content2String(CmdParagraph);
+
+                var controller = await this.ShowProgressAsync("", "发送中……");
+                controller.SetIndeterminate();
 
                 try
                 {
-                    var controller = await this.ShowProgressAsync("", "发送中……");
-                    controller.SetIndeterminate();
-
                     await Task.Run(() =>
                                     {
                                         string json = JsonConvert.SerializeObject(cmd);
@@ -224,6 +224,7 @@ namespace CommandTransmission
                 }
                 catch (Exception except)
                 {
+                    await controller.CloseAsync();
                     MessageBox.Show(except.Message, "失败");
                 }
             }
