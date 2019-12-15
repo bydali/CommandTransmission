@@ -9,4 +9,6 @@ using YDMSG;
 namespace CommandTransmission
 {
     public class EditNewCommand : PubSubEvent<MsgYDCommand> { }
+    public class ReceiptCommand : PubSubEvent<MsgReceipt> { }
 }
+

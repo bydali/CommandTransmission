@@ -11,7 +11,9 @@
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
 		<local:CmdListRowHeight x:Key="cmdListRowHeight" />
-		<local:CmdTargets x:Key="cmdTargets"/>
+		<local:CmdTargets x:Key="cmdTargets" />
+		<local:CmdCheckVisible x:Key="CheckVisible" />
+		<local:SimpleReverseBool x:Key="simpleReverse"/>
 	</Controls:MetroWindow.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -94,13 +96,12 @@
 							<DataGrid Grid.Row="1"
 									  Name="cachedCmdsDg"
 									  IsReadOnly="True"
-									  
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.ContextMenu>
 									<ContextMenu>
-										<MenuItem Header="删除此缓存"/>
+										<MenuItem Header="删除此缓存" />
 										<MenuItem Header="删除所有缓存" />
 									</ContextMenu>
 								</DataGrid.ContextMenu>
@@ -140,13 +141,23 @@
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.Columns>
-									<DataGridTextColumn Width="0.2*"
-														Header="命令号" />
-									<DataGridTextColumn Width="0.5*"
-														Header="命令标题" />
-									<DataGridTextColumn Width="0.3*"
-														Header="目标站台" />
+									<DataGridTextColumn Header="命令号"
+														Width="0.2*"
+														Binding="{Binding CmdSN}" />
+									<DataGridTextColumn Header="命令标题"
+														Width="0.5*"
+														Binding="{Binding Title}" />
+									<DataGridTextColumn Header="目标站台"
+														Width="0.3*"
+														Binding="{Binding Targets,Converter={StaticResource ResourceKey=cmdTargets}}" />
 								</DataGrid.Columns>
+								<DataGrid.RowStyle>
+									<Style BasedOn="{StaticResource MetroDataGridRow}"
+										   TargetType="DataGridRow">
+										<EventSetter Event="MouseDoubleClick"
+													 Handler="ChangeEdittingCmd" />
+									</Style>
+								</DataGrid.RowStyle>
 							</DataGrid>
 						</Grid>
 						<Grid Grid.Row="3">
@@ -183,7 +194,8 @@
 														Binding="{Binding Targets,Converter={StaticResource ResourceKey=cmdTargets}}" />
 								</DataGrid.Columns>
 								<DataGrid.RowStyle>
-									<Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="DataGridRow">
+									<Style BasedOn="{StaticResource MetroDataGridRow}"
+										   TargetType="DataGridRow">
 										<EventSetter Event="MouseDoubleClick"
 													 Handler="ChangeEdittingCmd" />
 									</Style>
@@ -515,14 +527,13 @@
 			</TabControl>
 
 			<Grid Grid.Column="2"
-				  Name="CmdEdittingGrid"
-				  IsEnabled="{Binding IsEnable}">
+				  Name="CmdEdittingGrid">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="180" />
 					<RowDefinition />
 					<RowDefinition Height="250" />
 				</Grid.RowDefinitions>
-				<TabControl>
+				<TabControl IsEnabled="{Binding IsEnable}">
 					<TabItem Header="调度命令"
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
@@ -608,7 +619,7 @@
 							<Controls:DateTimePicker SelectedDate="{Binding AuthorizeTime,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													 Grid.Column="1"
 													 Grid.Row="3"
-													 Culture="zh-CN"/>
+													 Culture="zh-CN" />
 							<TextBox Style="{x:Null}"
 									 Grid.Column="1"
 									 Grid.Row="4"
@@ -659,7 +670,8 @@
 						</Grid>
 					</TabItem>
 				</TabControl>
-				<TabControl Grid.Row="1">
+				<TabControl Grid.Row="1"
+							IsEnabled="{Binding IsEnable}">
 					<TabItem Header="详细内容"
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
@@ -708,7 +720,7 @@
 						<RowDefinition />
 						<RowDefinition Height="30" />
 					</Grid.RowDefinitions>
-					<Grid>
+					<Grid IsEnabled="{Binding IsEnable}">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="60" />
 							<ColumnDefinition Width="60" />
@@ -734,6 +746,7 @@
 							  AutoGenerateColumns="False"
 							  CanUserAddRows="False"
 							  ItemsSource="{Binding Targets}"
+							  IsReadOnly="{Binding IsEnable,Converter={StaticResource simpleReverse}}"
 							  Grid.Row="1">
 						<DataGrid.Columns>
 							<DataGridCheckBoxColumn Binding="{Binding IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
@@ -743,14 +756,35 @@
 												Binding="{Binding Name}" />
 							<DataGridTextColumn Width="0.3*"
 												Header="抄送" />
-							<DataGridTextColumn Width="0.1*"
-												Header="签收状态" />
+							<DataGridTemplateColumn Width="0.1*"
+													Header="签收状态">
+								<DataGridTemplateColumn.CellStyle>
+									<Style TargetType="DataGridCell">
+										<Setter Property="Template">
+											<Setter.Value>
+												<ControlTemplate>
+													<StackPanel VerticalAlignment="Center">
+														<Grid>
+															<iconPacks:PackIconFontAwesome Kind="CheckCircleRegular"
+																						   Foreground="Green"
+																						   Visibility="{Binding IsChecked,Converter={StaticResource CheckVisible}}"/>
+															<iconPacks:PackIconFontAwesome Kind="TimesCircleRegular"
+																						   Foreground="Red"
+																						   Visibility="{Binding IsChecked,Converter={StaticResource cmdListVisible}}"/>
+														</Grid>
+													</StackPanel>
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Style>
+								</DataGridTemplateColumn.CellStyle>
+							</DataGridTemplateColumn>
 							<DataGridTextColumn Width="0.2*"
 												Header="签收人"
-												Binding="{Binding Signee}"/>
+												Binding="{Binding Checkee}" />
 							<DataGridTextColumn Width="0.3*"
 												Header="签收时间"
-												Binding="{Binding SignTime}" />
+												Binding="{Binding CheckTime}" />
 						</DataGrid.Columns>
 					</DataGrid>
 					<Grid Grid.Row="2">
@@ -758,13 +792,13 @@
 									Orientation="Horizontal">
 							<Button Content="缓存" />
 							<Button Content="打印"
-									Margin="20,0,0,0" />
+									Margin="20,0,0,0"
+									/>
 							<Button Content="下达"
-									Margin="20,0,0,0" 
-									Click="SendMsg"/>
+									Margin="20,0,0,0"
+									Click="SendMsg"
+									IsEnabled="{Binding IsEnable}" />
 							<Button Content="代签"
-									Margin="20,0,0,0" />
-							<Button Content="关闭"
 									Margin="20,0,0,0" />
 						</StackPanel>
 					</Grid>
@@ -947,9 +981,8 @@
 				<TabControl Grid.Row="2">
 					<TabItem Header="列控限速"
 							 Controls:ControlsHelper.HeaderFontSize="15">
-						<Grid 										 
-							HorizontalAlignment="Center"									 
-							VerticalAlignment="Center">
+						<Grid HorizontalAlignment="Center"
+							  VerticalAlignment="Center">
 							<Grid.RowDefinitions>
 								<RowDefinition Height="auto" />
 								<RowDefinition Height="auto" />

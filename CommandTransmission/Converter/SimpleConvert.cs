@@ -29,6 +29,7 @@ namespace CommandTransmission
         }
     }
 
+    // 这个转换器可以用在两个地方
     class CmdListVisible : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -41,6 +42,39 @@ namespace CommandTransmission
             {
                 return Visibility.Visible;
             }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class CmdCheckVisible : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if ((bool)value)
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class SimpleReverseBool : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !((bool)value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,4 +1,5 @@
 ﻿using DSIM.Communications;
+using Newtonsoft.Json;
 using Prism.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -8,6 +9,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YDMSG;
 
 namespace CommandTransmission
 {
@@ -43,7 +45,10 @@ namespace CommandTransmission
                             BasicGetResult res = im.BasicGet("center", true);
                             if (res != null)
                             {
-                                var s = Encoding.UTF8.GetString(res.Body);
+                                var json = Encoding.UTF8.GetString(res.Body);
+
+                                var data = JsonConvert.DeserializeObject<MsgReceipt>(json);
+                                eventAggregator.GetEvent<ReceiptCommand>().Publish(data);  
                             }
                         }
                     });
@@ -61,7 +66,9 @@ namespace CommandTransmission
                 {
                     im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
 
-                    byte[] message = Encoding.UTF8.GetBytes(msg.ToString());
+                    string json = JsonConvert.SerializeObject(msg);
+
+                    byte[] message = Encoding.UTF8.GetBytes(json);
                     im.BasicPublish("amq.topic", "调度命令", null, message);
                 }
             }

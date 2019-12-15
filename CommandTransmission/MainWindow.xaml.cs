@@ -99,13 +99,48 @@ namespace CommandTransmission
                 }
             }
             receivedCmdsDg.ItemsSource = ReceivedCmds;
+
+            BindingOperations.EnableCollectionSynchronization(SendCmds, new object());
+            BindingOperations.EnableCollectionSynchronization(ReceivedCmds, new object());
         }
 
         private void RegisterALLEvent()
         {
             eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
             eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
+
+            eventAggregator.GetEvent<ReceiptCommand>().Unsubscribe(ReceiptCmd);
+            eventAggregator.GetEvent<ReceiptCommand>().Subscribe(ReceiptCmd);
         }
+
+        private void ReceiptCmd(MsgReceipt data)
+        {
+            var cmd = SendCmds.Where(i => i.CmdSN == data.CmdSN).First();
+            var station = cmd.Targets.Where(i => i.Name == data.Station).First();
+
+            station.IsChecked = true;
+            station.CheckTime = data.CheckTime;
+            station.Checkee = data.Checkee;
+
+            if (IsAllTargetChecked(cmd))
+            {
+                SendCmds.Remove(cmd);
+                ReceivedCmds.Insert(0, cmd);
+            }
+        }
+
+        private bool IsAllTargetChecked(MsgYDCommand cmd)
+        {
+            foreach (var item in cmd.Targets.Where(i=>i.IsSelected))
+            {
+                if (!item.IsChecked)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
 
         // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
@@ -212,20 +247,19 @@ namespace CommandTransmission
                 {
                     await Task.Run(() =>
                                     {
-                                        string json = JsonConvert.SerializeObject(cmd);
-                                        IO.SendMsg(json);
+                                        IO.SendMsg(cmd);
                                     });
 
                     await controller.CloseAsync();
 
                     cmd.IsEnable = false;
                     SendingCmds.Remove(cmd);
-                    SendCmds.Add(cmd);
+                    SendCmds.Insert(0, cmd);
                 }
                 catch (Exception except)
                 {
                     await controller.CloseAsync();
-                    MessageBox.Show(except.Message, "失败");
+                    MessageBox.Show(except.Message, "下达失败");
                 }
             }
 
