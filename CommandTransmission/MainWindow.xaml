@@ -4,9 +4,10 @@
 					  xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
 					  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
 					  xmlns:local="clr-namespace:CommandTransmission"
-					  xmlns:globalization="clr-namespace:System.Globalization;assembly=mscorlib"
 					  xmlns:prism="http://prismlibrary.com/"
-					  prism:ViewModelLocator.AutoWireViewModel="True">
+					  prism:ViewModelLocator.AutoWireViewModel="True"
+					  Closing="MetroWindow_Closing"
+					  >
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
 		<local:CmdListRowHeight x:Key="cmdListRowHeight" />
