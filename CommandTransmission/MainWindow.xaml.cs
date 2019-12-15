@@ -30,6 +30,7 @@ namespace CommandTransmission
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private long cmdSN = 1;
         private IEventAggregator eventAggregator;
         private ObservableCollection<MsgYDCommand> CachedCmds;
         private ObservableCollection<MsgYDCommand> SendCmds;
@@ -149,6 +150,8 @@ namespace CommandTransmission
         // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
         {
+            data.CmdSN = (cmdSN++).ToString();
+
             // 如果当前窗口有命令正在编辑，则显示保存该命令的内容
             if (CmdEdittingGrid.DataContext != null)
             {
@@ -197,6 +200,11 @@ namespace CommandTransmission
             {
                 CommandTemplateWindow window = new CommandTemplateWindow(eventAggregator);
                 window.Show();
+            }
+            else
+            {
+                var window = Application.Current.Windows.OfType<CommandTemplateWindow>().First();
+                window.WindowState = WindowState.Normal;
             }
         }
 
