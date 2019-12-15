@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CommandTransmission"
         mc:Ignorable="d"
-        Title="SpeedLimitedCommand" Height="450" Width="600">
+        Title="限速命令" Height="450" Width="600">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>

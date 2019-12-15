@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CommandTransmission"
 		xmlns:external="clr-namespace:YDMSG;assembly=YDMSG"
         mc:Ignorable="d"
-        Title="CommandTemplateWindow" Width="400">
+        Title="命令模板" Width="400">
 	<Window.Resources>
 		<HierarchicalDataTemplate DataType="{x:Type local:CmdTemplate}" ItemsSource="{Binding CmdList}">
 			<Label Content="{Binding Type}"/>
