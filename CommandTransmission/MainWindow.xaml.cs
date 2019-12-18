@@ -32,81 +32,14 @@ namespace CommandTransmission
     {
         private long cmdSN = 1;
         private IEventAggregator eventAggregator;
-        private ObservableCollection<MsgYDCommand> CachedCmds;
-        private ObservableCollection<MsgYDCommand> SendCmds;
-        private ObservableCollection<MsgYDCommand> ReceivedCmds;
-        private ObservableCollection<MsgYDCommand> SendingCmds;
 
         public MainWindow(IEventAggregator eventAggregator)
         {
             InitializeComponent();
 
             this.eventAggregator = eventAggregator;
-            InitialData();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
-        }
-
-        private void InitialData()
-        {
-            Title = ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString;
-
-            SendingCmds = new ObservableCollection<MsgYDCommand>();
-            sendingCmdsDg.ItemsSource = SendingCmds;
-
-            // 初始化缓存命令
-            CachedCmds = new ObservableCollection<MsgYDCommand>();
-            using (XmlReader reader = XmlReader.Create("CachedCmds.xml"))
-            {
-                while (!reader.EOF)
-                {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
-                    {
-                        //var targets = reader.GetAttribute("targets").Split('\t');
-                        //string s = string.Join(",", targets);
-                        //CachedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
-                    }
-                    reader.Read();
-                }
-            }
-            cachedCmdsDg.ItemsSource = CachedCmds;
-
-            // 初始化已发命令
-            SendCmds = new ObservableCollection<MsgYDCommand>();
-            using (XmlReader reader = XmlReader.Create("SendCmds.xml"))
-            {
-                while (!reader.EOF)
-                {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
-                    {
-                        //var targets = reader.GetAttribute("targets").Split('\t');
-                        //string s = string.Join(",", targets);
-                        //SendCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
-                    }
-                    reader.Read();
-                }
-            }
-            sendCmdsDg.ItemsSource = SendCmds;
-
-            // 初始化 接收命令
-            ReceivedCmds = new ObservableCollection<MsgYDCommand>();
-            using (XmlReader reader = XmlReader.Create("ReceivedCmds.xml"))
-            {
-                while (!reader.EOF)
-                {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
-                    {
-                        //var targets = reader.GetAttribute("targets").Split('\t');
-                        //string s = string.Join(",", targets);
-                        //ReceivedCmds.Add(new MsgYDCommand() { Title = reader.GetAttribute("title"), Targets = s });
-                    }
-                    reader.Read();
-                }
-            }
-            receivedCmdsDg.ItemsSource = ReceivedCmds;
-
-            BindingOperations.EnableCollectionSynchronization(SendCmds, new object());
-            BindingOperations.EnableCollectionSynchronization(ReceivedCmds, new object());
         }
 
         private void RegisterALLEvent()
@@ -120,23 +53,29 @@ namespace CommandTransmission
 
         private void ReceiptCmd(MsgReceipt data)
         {
-            var cmd = SendCmds.Where(i => i.CmdSN == data.CmdSN).First();
+            var sendLst = (ObservableCollection<MsgYDCommand>)sendCmdsDg.ItemsSource;
+            var sendingLst = (ObservableCollection<MsgYDCommand>)sendingCmdsDg.ItemsSource;
+
+            var cmd = sendingLst.Where(i => i.CmdSN == data.CmdSN).First();
             var station = cmd.Targets.Where(i => i.Name == data.Station).First();
 
-            station.IsChecked = true;
-            station.CheckTime = data.CheckTime;
-            station.Checkee = data.Checkee;
+            ChangeStationState(station, data);
 
             if (IsAllTargetChecked(cmd))
             {
-                SendCmds.Remove(cmd);
-                ReceivedCmds.Insert(0, cmd);
+                cmd.CmdState = CmdState.全部签收;
+                sendingLst.Remove(cmd);
+                sendLst.Insert(0, cmd);
+            }
+            else
+            {
+                cmd.CmdState = CmdState.部分签收;
             }
         }
 
         private bool IsAllTargetChecked(MsgYDCommand cmd)
         {
-            foreach (var item in cmd.Targets.Where(i=>i.IsSelected))
+            foreach (var item in cmd.Targets.Where(i => i.IsSelected))
             {
                 if (!item.IsChecked)
                 {
@@ -150,19 +89,12 @@ namespace CommandTransmission
         // 新建一个命令
         private void NewEdittingCmd(MsgYDCommand data)
         {
-            data.CmdSN = (cmdSN++).ToString();
-
-            // 如果当前窗口有命令正在编辑，则显示保存该命令的内容
-            if (CmdEdittingGrid.DataContext != null)
-            {
-                var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-                Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
-                CmdParagraph.Inlines.CopyTo(tmp, 0);
-                cmd.Content = tmp;
-            }
+            data.CmdSN = "XXX";
 
             //新命令的上下文数据
-            CmdEdittingGrid.DataContext = data;
+            var appVM = (AppVM)DataContext;
+            appVM.CurrentCmd = data;
+
             CmdParagraph.Inlines.Clear();
 
             var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
@@ -178,8 +110,6 @@ namespace CommandTransmission
                     CmdParagraph.Inlines.Add(hl);
                 }
             }
-
-            SendingCmds.Insert(0, data);
         }
 
         private void CreateCommand(object sender, RoutedEventArgs e)
@@ -195,6 +125,32 @@ namespace CommandTransmission
         }
 
         private void CmdTemplateClick(object sender, RoutedEventArgs e)
+        {
+            var dc = (AppVM)DataContext;
+            if (dc.CurrentCmd == null)
+            {
+                ShowCmdTemplateWindow();
+            }
+            else
+            {
+                if (dc.CurrentCmd.CmdState != CmdState.编辑)
+                {
+                    ShowCmdTemplateWindow();
+                }
+                else
+                {
+                    SaveAndNewWindow();
+                }
+            }
+        }
+
+        private void SaveAndNewWindow()
+        {
+            CacheCurrentCmd(null, null);
+            ShowCmdTemplateWindow();
+        }
+
+        private void ShowCmdTemplateWindow()
         {
             if (Application.Current.Windows.OfType<CommandTemplateWindow>().Count() == 0)
             {
@@ -217,7 +173,9 @@ namespace CommandTransmission
             CmdParagraph.Inlines.CopyTo(tmp, 0);
             cmdCurrent.Content = tmp;
 
-            CmdEdittingGrid.DataContext = cmd;
+            var appVM = (AppVM)DataContext;
+            appVM.CurrentCmd = cmd;
+
             CmdParagraph.Inlines.Clear();
             foreach (var item in (Inline[])cmd.Content)
             {
@@ -247,39 +205,96 @@ namespace CommandTransmission
 
         private async void SendMsg(object sender, RoutedEventArgs e)
         {
-            if (CmdEdittingGrid.DataContext != null)
+            var currentCmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            var cachedLst = (ObservableCollection<MsgYDCommand>)cachedCmdsDg.ItemsSource;
+            if (currentCmd != null && cachedLst.Contains(currentCmd))
             {
                 var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
                 cmd.Content = Content2String(CmdParagraph);
 
-                var controller = await this.ShowProgressAsync("", "发送中……");
-                controller.SetIndeterminate();
-
-                try
+                if (MessageBox.Show("请确认命令内容，是否继续", "操作提示",
+                    MessageBoxButton.YesNo, MessageBoxImage.Information)
+                    == MessageBoxResult.Yes)
                 {
-                    await Task.Run(() =>
-                                    {
-                                        IO.SendMsg(cmd);
-                                    });
+                    var controller = await this.ShowProgressAsync("", "发送中……");
+                    controller.SetIndeterminate();
 
-                    await controller.CloseAsync();
+                    try
+                    {
+                        await Task.Run(() =>
+                                        {
+                                            IO.SendMsg(cmd);
+                                        });
 
-                    cmd.IsEnable = false;
-                    SendingCmds.Remove(cmd);
-                    SendCmds.Insert(0, cmd);
+                        await controller.CloseAsync();
+
+                        ChangeCmdState(cmd);
+
+                        var sendingLst = (ObservableCollection<MsgYDCommand>)sendingCmdsDg.ItemsSource;
+                        cachedLst.Remove(cmd);
+                        sendingLst.Insert(0, cmd);
+                    }
+                    catch (Exception except)
+                    {
+                        await controller.CloseAsync();
+                        MessageBox.Show(except.Message, "下达失败");
+                    }
                 }
-                catch (Exception except)
-                {
-                    await controller.CloseAsync();
-                    MessageBox.Show(except.Message, "下达失败");
-                }
+
             }
-
+            else
+            {
+                MessageBox.Show("请将命令加入缓存队列");
+            }
         }
+
+
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Process.GetCurrentProcess().Kill();
+        }
+
+        private void CacheCurrentCmd(object sender, RoutedEventArgs e)
+        {
+            var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
+            CmdParagraph.Inlines.CopyTo(tmp, 0);
+            cmd.Content = tmp;
+
+            var cachedLst = (ObservableCollection<MsgYDCommand>)cachedCmdsDg.ItemsSource;
+            if (!cachedLst.Contains(cmd))
+            {
+                cachedLst.Insert(0, cmd);
+            }
+            MessageBox.Show("当前命令更新内容已缓存");
+        }
+
+        private void DeleteTheCache(object sender, RoutedEventArgs e)
+        {
+            var cmd = cachedCmdsDg.SelectedItem;
+            if (cmd != null)
+            {
+                ((AppVM)DataContext).CachedCmds.Remove((MsgYDCommand)cmd);
+            }
+        }
+
+        private void DeleteAllCache(object sender, RoutedEventArgs e)
+        {
+            var appVM = (AppVM)DataContext;
+            appVM.CachedCmds.Clear();
+        }
+
+        private void ChangeCmdState(MsgYDCommand cmd)
+        {
+            cmd.CmdState = CmdState.已下达;
+        }
+
+        private void ChangeStationState(Cmd2Station station, MsgReceipt data)
+        {
+            station.IsChecked = true;
+            station.CheckTime = data.CheckTime;
+            station.Checkee = data.Checkee;
         }
     }
 }

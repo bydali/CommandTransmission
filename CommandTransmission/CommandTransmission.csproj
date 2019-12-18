@@ -127,6 +127,7 @@
     <Compile Include="SpeedLimitedCommandWindow.xaml.cs">
       <DependentUpon>SpeedLimitedCommandWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\AppVM.cs" />
     <Compile Include="ViewModel\CmdTemplate.cs" />
     <Page Include="CommandTemplateWindow.xaml">
       <SubType>Designer</SubType>

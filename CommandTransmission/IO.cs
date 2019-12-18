@@ -9,6 +9,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using YDMSG;
 
 namespace CommandTransmission
@@ -29,30 +30,43 @@ namespace CommandTransmission
             //_mqHelper.MessageArrived += RabbitMQ_MessageArrived;
 
             // 以下为测试代码
-            ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin" };
-            using (IConnection conn = factory.CreateConnection())
+            try
             {
-                using (IModel im = conn.CreateModel())
+
+                ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin" };
+                using (IConnection conn = factory.CreateConnection())
                 {
-                    im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
-                    im.QueueDeclare("center");
-                    im.QueueBind("center", "amq.topic", "回执信息");
-
-                    await Task.Run(() =>
+                    using (IModel im = conn.CreateModel())
                     {
-                        while (true)
-                        {
-                            BasicGetResult res = im.BasicGet("center", true);
-                            if (res != null)
-                            {
-                                var json = Encoding.UTF8.GetString(res.Body);
+                        List<string> allTopic = new List<string>() { "回执信息" };
 
-                                var data = JsonConvert.DeserializeObject<MsgReceipt>(json);
-                                eventAggregator.GetEvent<ReceiptCommand>().Publish(data);  
-                            }
+                        im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
+                        im.QueueDeclare("center");
+                        foreach (var item in allTopic)
+                        {
+                            im.QueueBind("center", "amq.topic", item);
                         }
-                    });
+
+                        await Task.Run(() =>
+                        {
+                            while (true)
+                            {
+                                BasicGetResult res = im.BasicGet("center", true);
+                                if (res != null)
+                                {
+                                    var json = Encoding.UTF8.GetString(res.Body);
+
+                                    var data = JsonConvert.DeserializeObject<MsgReceipt>(json);
+                                    eventAggregator.GetEvent<ReceiptCommand>().Publish(data);
+                                }
+                            }
+                        });
+                    }
                 }
+            }
+            catch (Exception except)
+            {
+                MessageBox.Show(except.Message);
             }
         }
 

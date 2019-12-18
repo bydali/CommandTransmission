@@ -7,13 +7,16 @@
 					  xmlns:prism="http://prismlibrary.com/"
 					  prism:ViewModelLocator.AutoWireViewModel="True"
 					  Closing="MetroWindow_Closing"
-					  >
+					  Title="{Binding AppTitle}">
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
 		<local:CmdListRowHeight x:Key="cmdListRowHeight" />
 		<local:CmdTargets x:Key="cmdTargets" />
 		<local:CmdCheckVisible x:Key="CheckVisible" />
-		<local:SimpleReverseBool x:Key="simpleReverse"/>
+		<local:SimpleReverseBool x:Key="simpleReverse" />
+		<local:CmdStateConverter x:Key="cmdState" />
+		<local:BtnStateConverter0 x:Key="btnConvert0" />
+		<local:BtnStateConverter1 x:Key="btnConvert1" />
 	</Controls:MetroWindow.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -41,7 +44,7 @@
 						 Controls:ControlsHelper.HeaderFontSize="15">
 					<Grid>
 						<Grid.RowDefinitions>
-							<RowDefinition Height="80" />
+							<RowDefinition Height="auto" />
 							<RowDefinition Height="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}" />
 							<RowDefinition Height="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}" />
 							<RowDefinition Height="{Binding ElementName=sendingToggle,Path=IsChecked,Converter={StaticResource cmdListRowHeight}}" />
@@ -51,19 +54,21 @@
 							<StackPanel Orientation="Vertical"
 										HorizontalAlignment="Center"
 										VerticalAlignment="Center">
-								<StackPanel Orientation="Horizontal">
+								<StackPanel Orientation="Horizontal"
+											Margin="0,10,0,10">
 									<Rectangle Fill="Green"
 											   Width="20"
 											   Height="20" />
 									<Label Content="数据库正常"
 										   Margin="5,0,0,0" />
 									<Controls:NumericUpDown Minimum="0"
-															Maximum="24"
-															Style="{x:Null}" />
-									<Label Content="15:21:23"
+															Maximum="24" />
+									<Label Content="小时" />
+									<Label Content="{Binding Clock}"
 										   Margin="5,0,0,0" />
 								</StackPanel>
-								<StackPanel Orientation="Horizontal">
+								<StackPanel Orientation="Horizontal"
+											Margin="0,0,0,10">
 									<Rectangle Fill="Green"
 											   Width="20"
 											   Height="20" />
@@ -86,29 +91,31 @@
 								<Label Content="缓存命令"
 									   HorizontalAlignment="Center" />
 								<ToggleButton Name="cacheToggle"
-											  Width="30"
-											  HorizontalAlignment="Right">
+											  HorizontalAlignment="Right"
+											  Style="{DynamicResource MetroFlatToggleButton}">
 									<iconPacks:Material Kind="ArrowCollapseUp"
-														Height="10"
-														Width="10" />
+														Height="15"
+														Width="15" />
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  Name="cachedCmdsDg"
+									  SelectionMode="Single"
+									  ItemsSource="{Binding CachedCmds}"
 									  IsReadOnly="True"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.ContextMenu>
 									<ContextMenu>
-										<MenuItem Header="删除此缓存" />
-										<MenuItem Header="删除所有缓存" />
+										<MenuItem Header="删除指定缓存" Click="DeleteTheCache"/>
+										<MenuItem Header="删除所有缓存" Click="DeleteAllCache"/>
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号"
 														Width="0.2*"
-														Binding="{Binding CommandSN}" />
+														Binding="{Binding CmdSN}" />
 									<DataGridTextColumn Header="命令标题"
 														Width="0.5*"
 														Binding="{Binding Title}" />
@@ -116,6 +123,13 @@
 														Width="0.3*"
 														Binding="{Binding Target}" />
 								</DataGrid.Columns>
+								<DataGrid.RowStyle>
+									<Style BasedOn="{StaticResource MetroDataGridRow}"
+										   TargetType="DataGridRow">
+										<EventSetter Event="MouseDoubleClick"
+													 Handler="ChangeEdittingCmd" />
+									</Style>
+								</DataGrid.RowStyle>
 							</DataGrid>
 						</Grid>
 						<Grid Grid.Row="2">
@@ -127,16 +141,17 @@
 								<Label Content="接收命令"
 									   HorizontalAlignment="Center" />
 								<ToggleButton Name="receiveToggle"
-											  Width="30"
-											  HorizontalAlignment="Right">
+											  HorizontalAlignment="Right"
+											  Style="{DynamicResource MetroFlatToggleButton}">
 									<iconPacks:Material Kind="ArrowCollapseUp"
-														Height="10"
-														Width="10" />
+														Height="15"
+														Width="15" />
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  IsReadOnly="True"
 									  Name="receivedCmdsDg"
+									  ItemsSource="{Binding ReceivedCmds}"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=receiveToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
@@ -169,16 +184,17 @@
 								<Label Content="发送命令"
 									   HorizontalAlignment="Center" />
 								<ToggleButton Name="sendingToggle"
-											  Width="30"
-											  HorizontalAlignment="Right">
+											  HorizontalAlignment="Right"
+											  Style="{DynamicResource MetroFlatToggleButton}">
 									<iconPacks:Material Kind="ArrowCollapseUp"
-														Height="10"
-														Width="10" />
+														Height="15"
+														Width="15" />
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  IsReadOnly="True"
 									  Name="sendingCmdsDg"
+									  ItemsSource="{Binding SendingCmds}"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=sendingToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
@@ -211,16 +227,17 @@
 								<Label Content="已发命令"
 									   HorizontalAlignment="Center" />
 								<ToggleButton Name="sendToggle"
-											  Width="30"
-											  HorizontalAlignment="Right">
+											  HorizontalAlignment="Right"
+											  Style="{DynamicResource MetroFlatToggleButton}">
 									<iconPacks:Material Kind="ArrowCollapseUp"
-														Height="10"
-														Width="10" />
+														Height="15"
+														Width="15" />
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
 									  IsReadOnly="True"
 									  Name="sendCmdsDg"
+									  ItemsSource="{Binding SendCmds}"
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=sendToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
@@ -264,8 +281,8 @@
 								   HorizontalAlignment="Center" />
 							<Button HorizontalAlignment="Right">
 								<iconPacks:Material Kind="ArrowCollapseUp"
-													Height="10"
-													Width="10" />
+													Height="15"
+													Width="15" />
 							</Button>
 						</Grid>
 						<Border Grid.Row="1"
@@ -527,13 +544,14 @@
 			</TabControl>
 
 			<Grid Grid.Column="2"
-				  Name="CmdEdittingGrid">
+				  Name="CmdEdittingGrid"
+				  DataContext="{Binding CurrentCmd}">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="180" />
+					<RowDefinition Height="190" />
 					<RowDefinition />
 					<RowDefinition Height="250" />
 				</Grid.RowDefinitions>
-				<TabControl IsEnabled="{Binding IsEnable}">
+				<TabControl>
 					<TabItem Header="调度命令"
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
@@ -595,6 +613,7 @@
 								   Grid.Column="4" />
 							<CheckBox Content="需值班主任授权"
 									  IsChecked="{Binding NeedAuthorize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									  Name="DutyOfficerCheck"
 									  Margin="5,0,0,0"
 									  Grid.Row="4"
 									  Grid.Column="4"
@@ -602,16 +621,21 @@
 							<Label Content="命令分类"
 								   Grid.Row="5"
 								   Grid.Column="4" />
-							<TextBox Style="{x:Null}"
-									 Text="{Binding Title,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+							<TextBox Text="{Binding Title,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="1"
-									 Grid.ColumnSpan="4"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Text="{Binding CmdSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									 Grid.ColumnSpan="4" />
+							<Button Grid.Column="5"
+									HorizontalAlignment="Left"
+									Click="CmdTemplateClick"
+									Width="35"
+									Margin="10,0,0,0">
+								<iconPacks:Entypo Kind="NewMessage"
+												  Width="15"
+												  Height="15" />
+							</Button>
+							<TextBox Text="{Binding CmdSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="1"
-									 Grid.Row="1"
-									 Height="18" />
+									 Grid.Row="1" />
 							<Controls:DateTimePicker SelectedDate="{Binding CmdTime,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													 Grid.Column="1"
 													 Grid.Row="2"
@@ -620,63 +644,50 @@
 													 Grid.Column="1"
 													 Grid.Row="3"
 													 Culture="zh-CN" />
-							<TextBox Style="{x:Null}"
-									 Grid.Column="1"
-									 Grid.Row="4"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Grid.Column="1"
-									 Grid.Row="5"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
+							<TextBox Grid.Column="1"
+									 Grid.Row="4" />
+							<TextBox Grid.Column="1"
+									 Grid.Row="5" />
+							<TextBox Grid.Column="3"
+									 Grid.Row="1" />
+							<TextBox Text="{Binding CommanderSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="3"
-									 Grid.Row="1"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Text="{Binding CommanderSN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									 Grid.Row="2" />
+							<TextBox Text="{Binding DutyOfficer,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="3"
-									 Grid.Row="2"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Text="{Binding DutyOfficer,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-									 Grid.Column="3"
-									 Grid.Row="3"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Grid.Column="3"
-									 Grid.Row="4"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Grid.Column="3"
-									 Grid.Row="5"
-									 Height="18" />
-							<TextBox Style="{x:Null}"
-									 Text="{Binding CmdUnit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									 Grid.Row="3" />
+							<TextBox Grid.Column="3"
+									 Grid.Row="4" />
+							<TextBox Grid.Column="3"
+									 Grid.Row="5" />
+							<TextBox Text="{Binding CmdUnit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="5"
-									 Grid.Row="2"
-									 Height="18" />
+									 Grid.Row="2" />
 							<CheckBox IsChecked="{Binding AuthorizeState,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									  Grid.Column="5"
-									  Grid.Row="3"
-									  Height="18" />
-							<ListBox Grid.Column="5"
-									 Grid.Row="1">
-								<ListBoxItem Content="编辑" />
-							</ListBox>
-							<ListBox Grid.Column="5"
-									 Grid.Row="5">
-								<ListBoxItem Content="行车命令" />
-							</ListBox>
+									  Grid.Row="3" />
+							<ComboBox Grid.Column="5"
+									  Grid.Row="1"
+									  SelectedIndex="{Binding CmdState,Converter={StaticResource cmdState},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+								<ComboBoxItem Content="编辑" />
+								<ComboBoxItem Content="已下达" />
+								<ComboBoxItem Content="部分签收" />
+								<ComboBoxItem Content="全部签收" />
+							</ComboBox>
+							<ComboBox Grid.Column="5"
+									  Grid.Row="5"
+									  SelectedIndex="0">
+								<ComboBoxItem Content="行车命令" />
+							</ComboBox>
 						</Grid>
 					</TabItem>
 				</TabControl>
-				<TabControl Grid.Row="1"
-							IsEnabled="{Binding IsEnable}">
+				<TabControl Grid.Row="1">
 					<TabItem Header="详细内容"
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
 							<Grid.RowDefinitions>
-								<RowDefinition Height="30" />
+								<RowDefinition Height="auto" />
 								<RowDefinition />
 							</Grid.RowDefinitions>
 							<Grid>
@@ -687,18 +698,15 @@
 									<ColumnDefinition Width="0.25*" />
 								</Grid.ColumnDefinitions>
 								<Button Content="正文字体"
-										Width="50"
 										HorizontalAlignment="Left" />
 								<Button Content="修改或新增处的字体"
 										HorizontalAlignment="Left"
-										Grid.Column="1"
-										Width="100" />
+										Grid.Column="1" />
 								<CheckBox Content="草稿"
 										  Grid.Column="2" />
 								<Button Content="查看回执记录"
 										Grid.Column="3"
-										HorizontalAlignment="Right"
-										Width="80" />
+										HorizontalAlignment="Right" />
 							</Grid>
 							<GroupBox Header="命令内容"
 									  Grid.Row="1">
@@ -716,11 +724,11 @@
 				</TabControl>
 				<Grid Grid.Row="2">
 					<Grid.RowDefinitions>
-						<RowDefinition Height="25" />
+						<RowDefinition Height="auto" />
 						<RowDefinition />
-						<RowDefinition Height="30" />
+						<RowDefinition Height="auto" />
 					</Grid.RowDefinitions>
-					<Grid IsEnabled="{Binding IsEnable}">
+					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="60" />
 							<ColumnDefinition Width="60" />
@@ -735,19 +743,29 @@
 						<Button Content="按组选站"
 								Grid.Column="2"
 								HorizontalAlignment="Center" />
-						<Button Grid.Column="3"
-								HorizontalAlignment="Right">
-							<iconPacks:Material Kind="ArrowCollapseUp"
-												Height="10"
-												Width="10" />
-						</Button>
 					</Grid>
 					<DataGrid Name="allStationDg"
 							  AutoGenerateColumns="False"
 							  CanUserAddRows="False"
 							  ItemsSource="{Binding Targets}"
-							  IsReadOnly="{Binding IsEnable,Converter={StaticResource simpleReverse}}"
-							  Grid.Row="1">
+							  IsReadOnly="{Binding CmdState,Converter={StaticResource btnConvert1}}"
+							  Grid.Row="1"
+							  Style="{x:Null}">
+						<DataGrid.CellStyle>
+							<Style TargetType="DataGridCell">
+								<Style.Triggers>
+									<Trigger Property="IsSelected"
+											 Value="True">
+										<Setter Property="Foreground"
+												Value="Black" />
+										<Setter Property="Background"
+												Value="White" />
+										<Setter Property="BorderBrush"
+												Value="{x:Null}" />
+									</Trigger>
+								</Style.Triggers>
+							</Style>
+						</DataGrid.CellStyle>
 						<DataGrid.Columns>
 							<DataGridCheckBoxColumn Binding="{Binding IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 													Header="选中" />
@@ -764,13 +782,15 @@
 											<Setter.Value>
 												<ControlTemplate>
 													<StackPanel VerticalAlignment="Center">
-														<Grid>
+														<Grid 
+															Margin="5,0,0,0"
+															Visibility="{Binding IsSelected,Converter={StaticResource CheckVisible}}">
 															<iconPacks:PackIconFontAwesome Kind="CheckCircleRegular"
 																						   Foreground="Green"
-																						   Visibility="{Binding IsChecked,Converter={StaticResource CheckVisible}}"/>
+																						   Visibility="{Binding IsChecked,Converter={StaticResource CheckVisible}}" />
 															<iconPacks:PackIconFontAwesome Kind="TimesCircleRegular"
 																						   Foreground="Red"
-																						   Visibility="{Binding IsChecked,Converter={StaticResource cmdListVisible}}"/>
+																						   Visibility="{Binding IsChecked,Converter={StaticResource cmdListVisible}}" />
 														</Grid>
 													</StackPanel>
 												</ControlTemplate>
@@ -790,15 +810,21 @@
 					<Grid Grid.Row="2">
 						<StackPanel HorizontalAlignment="Center"
 									Orientation="Horizontal">
-							<Button Content="缓存" />
+							<Button Content="缓存"
+									Click="CacheCurrentCmd"
+									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert0}}"/>
 							<Button Content="打印"
-									Margin="20,0,0,0"
-									/>
+									Margin="20,0,0,0" />
+							<Button Content="申请批准"
+									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert0}}"
+									Visibility="{Binding ElementName=DutyOfficerCheck,Path=IsChecked,Converter={StaticResource CheckVisible}}"
+									Margin="20,0,0,0" />
 							<Button Content="下达"
+									IsEnabled="{Binding NeedAuthorize,Converter={StaticResource simpleReverse}}"
 									Margin="20,0,0,0"
-									Click="SendMsg"
-									IsEnabled="{Binding IsEnable}" />
+									Click="SendMsg" />
 							<Button Content="代签"
+									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert1}}"
 									Margin="20,0,0,0" />
 						</StackPanel>
 					</Grid>
@@ -816,9 +842,9 @@
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
 							<Grid.RowDefinitions>
-								<RowDefinition Height="25" />
+								<RowDefinition Height="auto" />
 								<RowDefinition />
-								<RowDefinition Height="25" />
+								<RowDefinition Height="auto" />
 							</Grid.RowDefinitions>
 							<Grid>
 								<Grid.ColumnDefinitions>
@@ -828,14 +854,15 @@
 								</Grid.ColumnDefinitions>
 								<Label Content="词汇分类"
 									   HorizontalAlignment="Right" />
-								<ListBox Grid.Column="1">
-									<ListBoxItem Content="word1" />
-								</ListBox>
+								<ComboBox SelectedIndex="0"
+										  Grid.Column="1">
+									<ComboBoxItem Content="word1" />
+								</ComboBox>
 								<Button Grid.Column="2"
-										Width="25">
+										Width="35">
 									<iconPacks:Material Kind="Wrench"
-														Width="10"
-														Height="10" />
+														Width="15"
+														Height="15" />
 								</Button>
 							</Grid>
 							<ListBox Grid.Row="1">
@@ -848,31 +875,29 @@
 										HorizontalAlignment="Center">
 								<Button>
 									<iconPacks:Material Kind="Export"
-														Width="10"
-														Height="10" />
+														Width="15"
+														Height="15" />
 								</Button>
-								<TextBox Style="{x:Null}"
-										 Grid.Column="1"
+								<TextBox Grid.Column="1"
 										 Width="100"
-										 Height="18"
 										 Margin="10,0,0,0" />
 								<Button Grid.Column="2"
 										Margin="10,0,0,0">
 									<iconPacks:Material Kind="Plus"
-														Width="10"
-														Height="10" />
+														Width="15"
+														Height="15" />
 								</Button>
 								<Button Grid.Column="3"
 										Margin="10,0,0,0">
 									<iconPacks:FontAwesome Kind="TimesSolid"
-														   Width="10"
-														   Height="10" />
+														   Width="15"
+														   Height="15" />
 								</Button>
 								<Button Grid.Column="4"
 										Margin="10,0,0,0">
 									<iconPacks:Material Kind="ContentSave"
-														Width="10"
-														Height="10" />
+														Width="15"
+														Height="15" />
 								</Button>
 							</StackPanel>
 						</Grid>
@@ -883,9 +908,9 @@
 							 Controls:ControlsHelper.HeaderFontSize="15">
 						<Grid>
 							<Grid.RowDefinitions>
-								<RowDefinition Height="130" />
+								<RowDefinition Height="auto" />
 								<RowDefinition />
-								<RowDefinition Height="30" />
+								<RowDefinition Height="auto" />
 							</Grid.RowDefinitions>
 							<Grid>
 								<Grid.RowDefinitions>
@@ -900,41 +925,48 @@
 									<ColumnDefinition />
 								</Grid.ColumnDefinitions>
 								<Label Content="命令类型"
-									   HorizontalAlignment="Right" />
+									   HorizontalAlignment="Right"
+									   Margin="0,0,10,0" />
 								<Label Content="中转站"
 									   Grid.Row="1"
-									   HorizontalAlignment="Right" />
+									   HorizontalAlignment="Right"
+									   Margin="0,0,10,0" />
 								<Label Content="车次"
 									   Grid.Row="2"
+									   Margin="0,0,10,0"
 									   HorizontalAlignment="Right" />
 								<Label Content="机车号"
 									   Grid.Row="3"
+									   Margin="0,0,10,0"
 									   HorizontalAlignment="Right" />
 								<Button Content="查找机车"
 										Grid.Row="4"
+										Margin="0,10,0,10"
 										Grid.ColumnSpan="2"
 										HorizontalAlignment="Center" />
-								<ListBox Grid.Column="1"
-										 HorizontalAlignment="Left"
-										 Width="100">
-									<ListBoxItem Content="调度命令" />
-								</ListBox>
-								<ListBox Grid.Column="1"
-										 Grid.Row="1"
-										 HorizontalAlignment="Left"
-										 Width="100">
-									<ListBoxItem Content="GSM-R 发送" />
-								</ListBox>
+								<ComboBox Grid.Column="1"
+										  HorizontalAlignment="Left"
+										  Width="100"
+										  Margin="10,0,0,0"
+										  SelectedIndex="0">
+									<ComboBoxItem Content="调度命令" />
+								</ComboBox>
+								<ComboBox Grid.Column="1"
+										  Grid.Row="1"
+										  HorizontalAlignment="Left"
+										  Width="100"
+										  Margin="10,0,0,0"
+										  SelectedIndex="0">
+									<ComboBoxItem Content="GSM-R 发送" />
+								</ComboBox>
 								<TextBox Grid.Row="2"
 										 Grid.Column="1"
-										 Style="{x:Null}"
-										 Height="18"
+										 Margin="10,0,0,0"
 										 Width="100"
 										 HorizontalAlignment="Left" />
 								<TextBox Grid.Row="3"
 										 Grid.Column="1"
-										 Style="{x:Null}"
-										 Height="18"
+										 Margin="10,0,0,0"
 										 Width="100"
 										 HorizontalAlignment="Left" />
 							</Grid>
