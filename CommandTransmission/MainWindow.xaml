@@ -812,19 +812,18 @@
 									Orientation="Horizontal">
 							<Button Content="缓存"
 									Click="CacheCurrentCmd"
-									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert0}}"/>
+									Command="{Binding CacheCmd}"/>
 							<Button Content="打印"
 									Margin="20,0,0,0" />
 							<Button Content="申请批准"
-									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert0}}"
-									Visibility="{Binding ElementName=DutyOfficerCheck,Path=IsChecked,Converter={StaticResource CheckVisible}}"
+									Command="{Binding ApplyFor}"						
 									Margin="20,0,0,0" />
 							<Button Content="下达"
-									IsEnabled="{Binding NeedAuthorize,Converter={StaticResource simpleReverse}}"
+									Command="{Binding SendCmd}"
 									Margin="20,0,0,0"
 									Click="SendMsg" />
 							<Button Content="代签"
-									IsEnabled="{Binding CmdState,Converter={StaticResource btnConvert1}}"
+									Command="{Binding AgentSign}"
 									Margin="20,0,0,0" />
 						</StackPanel>
 					</Grid>

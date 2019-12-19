@@ -60,7 +60,7 @@ namespace CommandTransmission
                     }
                     else if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        CmdTmp.Last().CmdList.Add(new MsgYDCommand(
+                        CmdTmp.Last().CmdList.Add(new MsgDispatchCommand(
                             reader.GetAttribute("title"),
                             reader.GetAttribute("content"),
                             allStations
@@ -74,11 +74,11 @@ namespace CommandTransmission
 
         private void TreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (((TreeView)sender).SelectedValue is MsgYDCommand)
+            if (((TreeView)sender).SelectedValue is MsgDispatchCommand)
             {
-                var cmd = (MsgYDCommand)((TreeView)sender).SelectedValue;
+                var cmd = (MsgDispatchCommand)((TreeView)sender).SelectedValue;
                 string json = JsonConvert.SerializeObject(cmd);
-                var cmd_copy = JsonConvert.DeserializeObject<MsgYDCommand>(json);
+                var cmd_copy = JsonConvert.DeserializeObject<MsgDispatchCommand>(json);
                 eventAggregator.GetEvent<EditNewCommand>().
                     Publish(cmd_copy);
             }

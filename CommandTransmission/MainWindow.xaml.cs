@@ -53,8 +53,8 @@ namespace CommandTransmission
 
         private void ReceiptCmd(MsgReceipt data)
         {
-            var sendLst = (ObservableCollection<MsgYDCommand>)sendCmdsDg.ItemsSource;
-            var sendingLst = (ObservableCollection<MsgYDCommand>)sendingCmdsDg.ItemsSource;
+            var sendLst = (ObservableCollection<MsgDispatchCommand>)sendCmdsDg.ItemsSource;
+            var sendingLst = (ObservableCollection<MsgDispatchCommand>)sendingCmdsDg.ItemsSource;
 
             var cmd = sendingLst.Where(i => i.CmdSN == data.CmdSN).First();
             var station = cmd.Targets.Where(i => i.Name == data.Station).First();
@@ -73,7 +73,7 @@ namespace CommandTransmission
             }
         }
 
-        private bool IsAllTargetChecked(MsgYDCommand cmd)
+        private bool IsAllTargetChecked(MsgDispatchCommand cmd)
         {
             foreach (var item in cmd.Targets.Where(i => i.IsSelected))
             {
@@ -87,7 +87,7 @@ namespace CommandTransmission
 
 
         // 新建一个命令
-        private void NewEdittingCmd(MsgYDCommand data)
+        private void NewEdittingCmd(MsgDispatchCommand data)
         {
             data.CmdSN = "XXX";
 
@@ -166,9 +166,9 @@ namespace CommandTransmission
 
         private void ChangeEdittingCmd(object sender, MouseButtonEventArgs e)
         {
-            var cmd = (MsgYDCommand)((DataGridRow)sender).DataContext;
+            var cmd = (MsgDispatchCommand)((DataGridRow)sender).DataContext;
 
-            var cmdCurrent = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            var cmdCurrent = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
             Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
             CmdParagraph.Inlines.CopyTo(tmp, 0);
             cmdCurrent.Content = tmp;
@@ -205,11 +205,11 @@ namespace CommandTransmission
 
         private async void SendMsg(object sender, RoutedEventArgs e)
         {
-            var currentCmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
-            var cachedLst = (ObservableCollection<MsgYDCommand>)cachedCmdsDg.ItemsSource;
+            var currentCmd = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
+            var cachedLst = (ObservableCollection<MsgDispatchCommand>)cachedCmdsDg.ItemsSource;
             if (currentCmd != null && cachedLst.Contains(currentCmd))
             {
-                var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+                var cmd = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
                 cmd.Content = Content2String(CmdParagraph);
 
                 if (MessageBox.Show("请确认命令内容，是否继续", "操作提示",
@@ -230,7 +230,7 @@ namespace CommandTransmission
 
                         ChangeCmdState(cmd);
 
-                        var sendingLst = (ObservableCollection<MsgYDCommand>)sendingCmdsDg.ItemsSource;
+                        var sendingLst = (ObservableCollection<MsgDispatchCommand>)sendingCmdsDg.ItemsSource;
                         cachedLst.Remove(cmd);
                         sendingLst.Insert(0, cmd);
                     }
@@ -257,12 +257,12 @@ namespace CommandTransmission
 
         private void CacheCurrentCmd(object sender, RoutedEventArgs e)
         {
-            var cmd = (MsgYDCommand)CmdEdittingGrid.DataContext;
+            var cmd = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
             Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
             CmdParagraph.Inlines.CopyTo(tmp, 0);
             cmd.Content = tmp;
 
-            var cachedLst = (ObservableCollection<MsgYDCommand>)cachedCmdsDg.ItemsSource;
+            var cachedLst = (ObservableCollection<MsgDispatchCommand>)cachedCmdsDg.ItemsSource;
             if (!cachedLst.Contains(cmd))
             {
                 cachedLst.Insert(0, cmd);
@@ -275,7 +275,7 @@ namespace CommandTransmission
             var cmd = cachedCmdsDg.SelectedItem;
             if (cmd != null)
             {
-                ((AppVM)DataContext).CachedCmds.Remove((MsgYDCommand)cmd);
+                ((AppVM)DataContext).CachedCmds.Remove((MsgDispatchCommand)cmd);
             }
         }
 
@@ -285,7 +285,7 @@ namespace CommandTransmission
             appVM.CachedCmds.Clear();
         }
 
-        private void ChangeCmdState(MsgYDCommand cmd)
+        private void ChangeCmdState(MsgDispatchCommand cmd)
         {
             cmd.CmdState = CmdState.已下达;
         }

@@ -11,7 +11,7 @@
 		<HierarchicalDataTemplate DataType="{x:Type local:CmdTemplate}" ItemsSource="{Binding CmdList}">
 			<Label Content="{Binding Type}"/>
 		</HierarchicalDataTemplate>
-		<HierarchicalDataTemplate DataType="{x:Type external:MsgYDCommand}">
+		<HierarchicalDataTemplate DataType="{x:Type external:MsgDispatchCommand}">
 			<Label Content="{Binding Title}"/>
 		</HierarchicalDataTemplate>
 	</Window.Resources>
