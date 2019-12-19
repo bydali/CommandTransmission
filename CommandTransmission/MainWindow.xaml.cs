@@ -142,10 +142,11 @@ namespace CommandTransmission
 
             ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
             ((AppVM)DataContext).CurrentCmd = cmd;
-            cmd.CmdState = CmdState.已缓存;
 
             CmdParagraph.Inlines.Clear();
             CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
+
+            cmd.CmdState = CmdState.已缓存;
         }
 
         private void ReceiptCmd(MsgReceipt data)
@@ -300,6 +301,10 @@ namespace CommandTransmission
                 {
                     ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
                 }
+            }
+            else
+            {
+                ((AppVM)DataContext).CurrentCmd = cmd;
             }
         }
 
