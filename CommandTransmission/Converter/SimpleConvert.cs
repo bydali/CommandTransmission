@@ -93,14 +93,18 @@ namespace CommandTransmission
             var source = (CmdState)value;
             switch (source)
             {
-                case CmdState.编辑:
+                case CmdState.未缓存:
                     return 0;
-                case CmdState.已下达:
+                case CmdState.已缓存:
                     return 1;
-                case CmdState.部分签收:
+                case CmdState.已下达:
                     return 2;
-                case CmdState.全部签收:
+                case CmdState.部分签收:
                     return 3;
+                case CmdState.全部签收:
+                    return 4;
+                default:
+                    break;
             }
             return -1;
         }
@@ -111,59 +115,18 @@ namespace CommandTransmission
             switch (target)
             {
                 case 0:
-                    return CmdState.编辑;
+                    return CmdState.未缓存;
                 case 1:
-                    return CmdState.已下达;
+                    return CmdState.已缓存;
                 case 2:
-                    return CmdState.部分签收;
+                    return CmdState.已下达;
                 case 3:
+                    return CmdState.部分签收;
+                case 4:
                     return CmdState.全部签收;
             }
             return -1;
         }
     }
 
-    // 用于界面按钮可用性
-    class BtnStateConverter0 : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var source = (CmdState)value;
-            if (source== CmdState.编辑)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    // 用于界面按钮可用性
-    class BtnStateConverter1 : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var source = (CmdState)value;
-            if (source == CmdState.编辑)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

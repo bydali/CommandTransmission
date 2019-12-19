@@ -14,7 +14,7 @@ namespace CommandTransmission
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var source=(ObservableCollection<Cmd2Station>)value;
+            var source=(ObservableCollection<Target>)value;
             var target = string.Join(",", source.
                 Where(i => { return i.IsSelected; }).
                 Select(i => { return i.Name; }));

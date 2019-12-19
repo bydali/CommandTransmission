@@ -30,16 +30,87 @@ namespace CommandTransmission
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private long cmdSN = 1;
+        private int cmdSN;
         private IEventAggregator eventAggregator;
 
         public MainWindow(IEventAggregator eventAggregator)
         {
+            this.eventAggregator = eventAggregator;
             InitializeComponent();
 
-            this.eventAggregator = eventAggregator;
+            SetCommandBindings();
             RegisterALLEvent();
             IO.ReceiveMsg(eventAggregator);
+        }
+
+        private void SetCommandBindings()
+        {
+            var appVM = (AppVM)DataContext;
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.CacheCmd,
+                    CacheExecute,
+                    appVM.CacheCanExecute));
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.ApplyFor,
+                    ApplyForExecute,
+                    appVM.ApplyForCanExecute));
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.SendCmd,
+                    appVM.SendCmdExecute,
+                    appVM.SendCmdCanExecute));
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.AgentSign,
+                    appVM.AgentSignExecute,
+                    appVM.AgentSignCanExecute));
+        }
+
+        private void ApplyForExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            
+        }
+
+        private async void CacheExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            var cmd = ((AppVM)DataContext).CurrentCmd;
+            cmd.Content = FillCmdContent(cmd);
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    IO.SendMsg(cmd, "DSIM.Command.Create");
+                });
+            }
+            catch (Exception except)
+            {
+                MessageBox.Show(except.Message);
+            }
+        }
+
+        private string FillCmdContent(MsgDispatchCommand cmd)
+        {
+            string s = "";
+
+            foreach (var item in CmdParagraph.Inlines)
+            {
+                if (item is Run)
+                {
+                    s += ((Run)item).Text;
+                }
+                else
+                {
+                    foreach (Run fill in ((Hyperlink)item).Inlines)
+                    {
+                        s += fill.Text;
+                    }
+                }
+            }
+
+            return s;
         }
 
         private void RegisterALLEvent()
@@ -49,6 +120,32 @@ namespace CommandTransmission
 
             eventAggregator.GetEvent<ReceiptCommand>().Unsubscribe(ReceiptCmd);
             eventAggregator.GetEvent<ReceiptCommand>().Subscribe(ReceiptCmd);
+
+            eventAggregator.GetEvent<CacheCommand>().Unsubscribe(UpdateCacheCmd);
+            eventAggregator.GetEvent<CacheCommand>().Subscribe(UpdateCacheCmd, ThreadOption.UIThread);
+        }
+
+        /// <summary>
+        /// 用于更新网络广播到本地的缓存命令
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void UpdateCacheCmd(MsgDispatchCommand cmd)
+        {
+            var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
+            if (result.Count() != 0)
+            {
+                if (((AppVM)DataContext).CachedCmds.Count != 0)
+                {
+                    ((AppVM)DataContext).CachedCmds.Remove(result.First());
+                }
+            }
+
+            ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
+            ((AppVM)DataContext).CurrentCmd = cmd;
+            cmd.CmdState = CmdState.已缓存;
+
+            CmdParagraph.Inlines.Clear();
+            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
         }
 
         private void ReceiptCmd(MsgReceipt data)
@@ -77,7 +174,7 @@ namespace CommandTransmission
         {
             foreach (var item in cmd.Targets.Where(i => i.IsSelected))
             {
-                if (!item.IsChecked)
+                if (!item.IsSigned)
                 {
                     return false;
                 }
@@ -89,7 +186,8 @@ namespace CommandTransmission
         // 新建一个命令
         private void NewEdittingCmd(MsgDispatchCommand data)
         {
-            data.CmdSN = "XXX";
+            cmdSN = ((AppVM)DataContext).CachedCmds.Count + 1;
+            data.CmdSN = cmdSN.ToString();
 
             //新命令的上下文数据
             var appVM = (AppVM)DataContext;
@@ -124,30 +222,52 @@ namespace CommandTransmission
             window.ShowDialog();
         }
 
+        /// <summary>
+        /// 新建命令
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CmdTemplateClick(object sender, RoutedEventArgs e)
         {
-            var dc = (AppVM)DataContext;
-            if (dc.CurrentCmd == null)
+            TryCmdTemplateWindow();
+        }
+
+        private void SaveAndNewWindow()
+        {
+            TryCmdTemplateWindow();
+        }
+
+        private void TryCmdTemplateWindow()
+        {
+            var appVM = (AppVM)DataContext;
+            if (appVM.CurrentCmd != null)
             {
-                ShowCmdTemplateWindow();
-            }
-            else
-            {
-                if (dc.CurrentCmd.CmdState != CmdState.编辑)
+                // 如果没有缓存，或者缓存了没有新的修改，就直接打开窗口
+                if (!appVM.CurrentCmd.IsCached ||
+                    (appVM.CurrentCmd.IsCached &&
+                    !appVM.CurrentCmd.IsRead2Update))
                 {
                     ShowCmdTemplateWindow();
                 }
                 else
                 {
-                    SaveAndNewWindow();
+                    if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                        MessageBoxResult.Yes)
+                    {
+                        CacheExecute(null, null);
+                    }
+                    else
+                    {
+                        appVM.CurrentCmd.IsRead2Update = false;
+                        ShowCmdTemplateWindow();
+                    }
+
                 }
             }
-        }
-
-        private void SaveAndNewWindow()
-        {
-            CacheCurrentCmd(null, null);
-            ShowCmdTemplateWindow();
+            else
+            {
+                ShowCmdTemplateWindow();
+            }
         }
 
         private void ShowCmdTemplateWindow()
@@ -168,18 +288,18 @@ namespace CommandTransmission
         {
             var cmd = (MsgDispatchCommand)((DataGridRow)sender).DataContext;
 
-            var cmdCurrent = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
-            Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
-            CmdParagraph.Inlines.CopyTo(tmp, 0);
-            cmdCurrent.Content = tmp;
-
-            var appVM = (AppVM)DataContext;
-            appVM.CurrentCmd = cmd;
-
-            CmdParagraph.Inlines.Clear();
-            foreach (var item in (Inline[])cmd.Content)
+            if (((AppVM)DataContext).CurrentCmd.IsCached &&
+                ((AppVM)DataContext).CurrentCmd.IsRead2Update)
             {
-                CmdParagraph.Inlines.Add(item);
+                if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                    MessageBoxResult.Yes)
+                {
+                    CacheExecute(null, null);
+                }
+                else
+                {
+                    ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
+                }
             }
         }
 
@@ -216,29 +336,7 @@ namespace CommandTransmission
                     MessageBoxButton.YesNo, MessageBoxImage.Information)
                     == MessageBoxResult.Yes)
                 {
-                    var controller = await this.ShowProgressAsync("", "发送中……");
-                    controller.SetIndeterminate();
 
-                    try
-                    {
-                        await Task.Run(() =>
-                                        {
-                                            IO.SendMsg(cmd);
-                                        });
-
-                        await controller.CloseAsync();
-
-                        ChangeCmdState(cmd);
-
-                        var sendingLst = (ObservableCollection<MsgDispatchCommand>)sendingCmdsDg.ItemsSource;
-                        cachedLst.Remove(cmd);
-                        sendingLst.Insert(0, cmd);
-                    }
-                    catch (Exception except)
-                    {
-                        await controller.CloseAsync();
-                        MessageBox.Show(except.Message, "下达失败");
-                    }
                 }
 
             }
@@ -253,21 +351,6 @@ namespace CommandTransmission
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Process.GetCurrentProcess().Kill();
-        }
-
-        private void CacheCurrentCmd(object sender, RoutedEventArgs e)
-        {
-            var cmd = (MsgDispatchCommand)CmdEdittingGrid.DataContext;
-            Inline[] tmp = new Inline[CmdParagraph.Inlines.Count];
-            CmdParagraph.Inlines.CopyTo(tmp, 0);
-            cmd.Content = tmp;
-
-            var cachedLst = (ObservableCollection<MsgDispatchCommand>)cachedCmdsDg.ItemsSource;
-            if (!cachedLst.Contains(cmd))
-            {
-                cachedLst.Insert(0, cmd);
-            }
-            MessageBox.Show("当前命令更新内容已缓存");
         }
 
         private void DeleteTheCache(object sender, RoutedEventArgs e)
@@ -285,16 +368,20 @@ namespace CommandTransmission
             appVM.CachedCmds.Clear();
         }
 
-        private void ChangeCmdState(MsgDispatchCommand cmd)
+        private void ChangeStationState(Target target, MsgReceipt data)
         {
-            cmd.CmdState = CmdState.已下达;
+            target.IsSigned = true;
+            target.CheckTime = data.CheckTime;
+            target.Checkee = data.Checkee;
         }
 
-        private void ChangeStationState(Cmd2Station station, MsgReceipt data)
+        private void CmdTb_TextChanged(object sender, TextChangedEventArgs e)
         {
-            station.IsChecked = true;
-            station.CheckTime = data.CheckTime;
-            station.Checkee = data.Checkee;
+            var appVM = (AppVM)DataContext;
+            if (appVM.CurrentCmd != null && appVM.CurrentCmd.IsCached)
+            {
+                appVM.CurrentCmd.IsRead2Update = true;
+            }
         }
     }
 }

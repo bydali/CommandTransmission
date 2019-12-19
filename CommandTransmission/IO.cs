@@ -22,12 +22,6 @@ namespace CommandTransmission
         public static async void ReceiveMsg(IEventAggregator aggregator)
         {
             eventAggregator = aggregator;
-            //MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
-            //_mqHelper = new MQHelper
-            //{
-            //    ClientSubscriptionId = ConfigurationManager.ConnectionStrings["ClientID"].ConnectionString
-            //};
-            //_mqHelper.MessageArrived += RabbitMQ_MessageArrived;
 
             // 以下为测试代码
             try
@@ -38,7 +32,8 @@ namespace CommandTransmission
                 {
                     using (IModel im = conn.CreateModel())
                     {
-                        List<string> allTopic = new List<string>() { "回执信息" };
+                        List<string> allTopic = new List<string>()
+                        { "DSIM.Command.Create", };
 
                         im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
                         im.QueueDeclare("center");
@@ -56,8 +51,8 @@ namespace CommandTransmission
                                 {
                                     var json = Encoding.UTF8.GetString(res.Body);
 
-                                    var data = JsonConvert.DeserializeObject<MsgReceipt>(json);
-                                    eventAggregator.GetEvent<ReceiptCommand>().Publish(data);
+                                    var data = JsonConvert.DeserializeObject<MsgDispatchCommand>(json);
+                                    eventAggregator.GetEvent<CacheCommand>().Publish(data);
                                 }
                             }
                         });
@@ -70,7 +65,7 @@ namespace CommandTransmission
             }
         }
 
-        public static void SendMsg(object msg)
+        public static void SendMsg(object msg,string topic)
         {
             // 以下为测试代码
             ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin" };
@@ -78,12 +73,13 @@ namespace CommandTransmission
             {
                 using (IModel im = conn.CreateModel())
                 {
-                    im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
-
                     string json = JsonConvert.SerializeObject(msg);
-
                     byte[] message = Encoding.UTF8.GetBytes(json);
-                    im.BasicPublish("amq.topic", "调度命令", null, message);
+
+                    im.ExchangeDeclare("amq.topic", ExchangeType.Topic, durable: true);
+                    im.BasicPublish("amq.topic", topic, null, message);
+
+
                 }
             }
         }
@@ -91,6 +87,14 @@ namespace CommandTransmission
         private static void RabbitMQ_MessageArrived(object sender, MsgCategoryEnum e)
         {
             eventAggregator.GetEvent<PubSubEvent<string>>().Publish("asdf");
+        }
+
+        public static T CopySomething<T>(object obj)
+        {
+            string json = JsonConvert.SerializeObject(obj);
+            var copy = JsonConvert.DeserializeObject<T>(json);
+
+            return copy;
         }
 
     }

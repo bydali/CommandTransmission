@@ -34,16 +34,19 @@ namespace CommandTransmission
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 从配置文件加载命令模板
+        /// </summary>
         private void GenerateTemplate()
         {
-            ObservableCollection<Cmd2Station> allStations = new ObservableCollection<Cmd2Station>();
-            using (XmlReader reader = XmlReader.Create("MyStations.xml"))
+            ObservableCollection<Target> allTargets = new ObservableCollection<Target>();
+            using (XmlReader reader = XmlReader.Create("AllTargets.xml"))
             {
                 while (!reader.EOF)
                 {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "station")
+                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "target")
                     {
-                        allStations.Add(new Cmd2Station() { Name = reader.GetAttribute("name") });
+                        allTargets.Add(new Target() { Name = reader.GetAttribute("name") });
                     }
                     reader.Read();
                 }
@@ -63,7 +66,8 @@ namespace CommandTransmission
                         CmdTmp.Last().CmdList.Add(new MsgDispatchCommand(
                             reader.GetAttribute("title"),
                             reader.GetAttribute("content"),
-                            allStations
+                            reader.GetAttribute("need_authorization").Equals("1"),
+                            allTargets
                             ));
                     }
                     reader.Read();
@@ -72,13 +76,17 @@ namespace CommandTransmission
             DataContext = CmdTmp;
         }
 
+        /// <summary>
+        /// 生成模板命令的一个副本，因而使用反序列化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (((TreeView)sender).SelectedValue is MsgDispatchCommand)
             {
                 var cmd = (MsgDispatchCommand)((TreeView)sender).SelectedValue;
-                string json = JsonConvert.SerializeObject(cmd);
-                var cmd_copy = JsonConvert.DeserializeObject<MsgDispatchCommand>(json);
+                var cmd_copy = IO.CopySomething<MsgDispatchCommand>(cmd);
                 eventAggregator.GetEvent<EditNewCommand>().
                     Publish(cmd_copy);
             }

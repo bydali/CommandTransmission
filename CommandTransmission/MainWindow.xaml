@@ -7,7 +7,8 @@
 					  xmlns:prism="http://prismlibrary.com/"
 					  prism:ViewModelLocator.AutoWireViewModel="True"
 					  Closing="MetroWindow_Closing"
-					  Title="{Binding AppTitle}">
+					  Title="{Binding AppTitle}"
+					  Name="TopWindow">
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
 		<local:CmdListRowHeight x:Key="cmdListRowHeight" />
@@ -15,8 +16,6 @@
 		<local:CmdCheckVisible x:Key="CheckVisible" />
 		<local:SimpleReverseBool x:Key="simpleReverse" />
 		<local:CmdStateConverter x:Key="cmdState" />
-		<local:BtnStateConverter0 x:Key="btnConvert0" />
-		<local:BtnStateConverter1 x:Key="btnConvert1" />
 	</Controls:MetroWindow.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -108,8 +107,10 @@
 									  Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
 								<DataGrid.ContextMenu>
 									<ContextMenu>
-										<MenuItem Header="删除指定缓存" Click="DeleteTheCache"/>
-										<MenuItem Header="删除所有缓存" Click="DeleteAllCache"/>
+										<MenuItem Header="删除指定缓存"
+												  Click="DeleteTheCache" />
+										<MenuItem Header="删除所有缓存"
+												  Click="DeleteAllCache" />
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 								<DataGrid.Columns>
@@ -612,7 +613,7 @@
 								   Grid.Row="3"
 								   Grid.Column="4" />
 							<CheckBox Content="需值班主任授权"
-									  IsChecked="{Binding NeedAuthorize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									  IsChecked="{Binding NeedAuthorization,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									  Name="DutyOfficerCheck"
 									  Margin="5,0,0,0"
 									  Grid.Row="4"
@@ -663,13 +664,14 @@
 							<TextBox Text="{Binding CmdUnit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									 Grid.Column="5"
 									 Grid.Row="2" />
-							<CheckBox IsChecked="{Binding AuthorizeState,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+							<CheckBox IsChecked="{Binding IsAuthorized,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
 									  Grid.Column="5"
 									  Grid.Row="3" />
 							<ComboBox Grid.Column="5"
 									  Grid.Row="1"
 									  SelectedIndex="{Binding CmdState,Converter={StaticResource cmdState},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-								<ComboBoxItem Content="编辑" />
+								<ComboBoxItem Content="未缓存" />
+								<ComboBoxItem Content="已缓存" />
 								<ComboBoxItem Content="已下达" />
 								<ComboBoxItem Content="部分签收" />
 								<ComboBoxItem Content="全部签收" />
@@ -711,6 +713,7 @@
 							<GroupBox Header="命令内容"
 									  Grid.Row="1">
 								<RichTextBox IsDocumentEnabled="True"
+											 TextChanged="CmdTb_TextChanged"
 											 Name="cmdTb">
 									<FlowDocument FontSize="15">
 										<Paragraph Padding="20"
@@ -748,7 +751,6 @@
 							  AutoGenerateColumns="False"
 							  CanUserAddRows="False"
 							  ItemsSource="{Binding Targets}"
-							  IsReadOnly="{Binding CmdState,Converter={StaticResource btnConvert1}}"
 							  Grid.Row="1"
 							  Style="{x:Null}">
 						<DataGrid.CellStyle>
@@ -782,16 +784,12 @@
 											<Setter.Value>
 												<ControlTemplate>
 													<StackPanel VerticalAlignment="Center">
-														<Grid 
-															Margin="5,0,0,0"
-															Visibility="{Binding IsSelected,Converter={StaticResource CheckVisible}}">
+														<StackPanel Margin="5,0,0,0">
+															<TextBlock Text="{Binding SignState}" />
 															<iconPacks:PackIconFontAwesome Kind="CheckCircleRegular"
 																						   Foreground="Green"
-																						   Visibility="{Binding IsChecked,Converter={StaticResource CheckVisible}}" />
-															<iconPacks:PackIconFontAwesome Kind="TimesCircleRegular"
-																						   Foreground="Red"
-																						   Visibility="{Binding IsChecked,Converter={StaticResource cmdListVisible}}" />
-														</Grid>
+																						   Visibility="{Binding IsSigned,Converter={StaticResource CheckVisible}}" />
+														</StackPanel>
 													</StackPanel>
 												</ControlTemplate>
 											</Setter.Value>
@@ -811,19 +809,17 @@
 						<StackPanel HorizontalAlignment="Center"
 									Orientation="Horizontal">
 							<Button Content="缓存"
-									Click="CacheCurrentCmd"
-									Command="{Binding CacheCmd}"/>
+									Command="{Binding ElementName=TopWindow,Path=DataContext.CacheCmd}" />
 							<Button Content="打印"
 									Margin="20,0,0,0" />
 							<Button Content="申请批准"
-									Command="{Binding ApplyFor}"						
+									Command="{Binding ElementName=TopWindow,Path=DataContext.ApplyFor}"
 									Margin="20,0,0,0" />
 							<Button Content="下达"
-									Command="{Binding SendCmd}"
-									Margin="20,0,0,0"
-									Click="SendMsg" />
+									Command="{Binding ElementName=TopWindow,Path=DataContext.SendCmd}"
+									Margin="20,0,0,0" />
 							<Button Content="代签"
-									Command="{Binding AgentSign}"
+									Command="{Binding ElementName=TopWindow,Path=DataContext.AgentSign}"
 									Margin="20,0,0,0" />
 						</StackPanel>
 					</Grid>

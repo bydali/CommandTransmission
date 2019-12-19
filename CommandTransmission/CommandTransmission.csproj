@@ -187,7 +187,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Config\MyStations.xml" />
+    <Resource Include="Config\AllTargets.xml" />
     <Resource Include="Config\CmdTemplate.xml" />
     <Resource Include="Config\CachedCmds.xml" />
     <Resource Include="Config\SendCmds.xml" />

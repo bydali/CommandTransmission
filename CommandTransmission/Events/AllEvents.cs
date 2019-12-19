@@ -10,5 +10,6 @@ namespace CommandTransmission
 {
     public class EditNewCommand : PubSubEvent<MsgDispatchCommand> { }
     public class ReceiptCommand : PubSubEvent<MsgReceipt> { }
+    public class CacheCommand : PubSubEvent<MsgDispatchCommand> { }
 }
 

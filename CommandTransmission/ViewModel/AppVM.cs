@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml;
 using YDMSG;
@@ -49,35 +50,10 @@ namespace CommandTransmission
         }
         private MsgDispatchCommand currentCmd;
 
-        public DelegateCommand CacheCmd { get; private set; }
-        public DelegateCommand ApplyFor { get; private set; }
-        public DelegateCommand SendCmd { get; private set; }
-        public DelegateCommand AgentSign { get; private set; }
-
-        private bool agentCanExecute;
-        private bool sendCanExecute;
-        private bool applyCanExecute;
-        private bool cacheCanExecute;
-        public bool AgentCanExecute
-        {
-            get => agentCanExecute;
-            set => agentCanExecute = value;
-        }
-        public bool SendCanExecute
-        {
-            get => sendCanExecute;
-            set => sendCanExecute = value;
-        }
-        public bool ApplyCanExecute
-        {
-            get => applyCanExecute;
-            set => applyCanExecute = value;
-        }
-        public bool CacheCanExecute
-        {
-            get => cacheCanExecute;
-            set => cacheCanExecute = value;
-        }
+        public RoutedUICommand CacheCmd { get; set; }
+        public RoutedUICommand ApplyFor { get; set; }
+        public RoutedUICommand SendCmd { get; set; }
+        public RoutedUICommand AgentSign { get; set; }
 
         internal AppVM(IEventAggregator eventAggregator)
         {
@@ -138,33 +114,76 @@ namespace CommandTransmission
                     reader.Read();
                 }
             }
-            BindingOperations.EnableCollectionSynchronization(SendingCmds, new object());
-            BindingOperations.EnableCollectionSynchronization(SendCmds, new object());
+            BindingOperations.EnableCollectionSynchronization(CachedCmds, new object());
 
-
-            CacheCmd = new DelegateCommand(CacheExecute).ObservesProperty(() => CacheCanExecute);
-            ApplyFor = new DelegateCommand(ApplyExecute).ObservesProperty(() => ApplyCanExecute);
-            SendCmd = new DelegateCommand(SendExecute).ObservesProperty(() => SendCanExecute);
-            AgentSign = new DelegateCommand(AgentExecute).ObservesProperty(() => AgentCanExecute);
+            CacheCmd = new RoutedUICommand();
+            ApplyFor = new RoutedUICommand();
+            SendCmd = new RoutedUICommand();
+            AgentSign = new RoutedUICommand();
         }
 
-        private void AgentExecute()
+        internal void ApplyForCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (CurrentCmd == null)
+            {
+                e.CanExecute = false;
+            }
+            else
+            {
+                if ((CurrentCmd.CmdState == CmdState.已缓存)&&
+                    (CurrentCmd.NeedAuthorization==true))
+                {
+                    e.CanExecute = true;
+                }
+                else 
+                {
+                    e.CanExecute = false;
+                }
+            }
+        }
+
+        internal void SendCmdExecute(object sender, ExecutedRoutedEventArgs e)
         {
 
         }
 
-        private void SendExecute()
+        internal void SendCmdCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = false;
+        }
+
+        internal void AgentSignCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = false;
+        }
+
+        internal void AgentSignExecute(object sender, ExecutedRoutedEventArgs e)
         {
 
         }
 
-        private void ApplyExecute()
+        internal void CacheCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-
-        }
-
-        private void CacheExecute()
-        {
+            if (CurrentCmd == null)
+            {
+                e.CanExecute = false;
+            }
+            else
+            {
+                if (!(CurrentCmd.CmdState==CmdState.已缓存))
+                {
+                    e.CanExecute = true;
+                }
+                else if ((CurrentCmd.CmdState == CmdState.已缓存)
+                    && CurrentCmd.IsRead2Update)
+                {
+                    e.CanExecute = true;
+                }
+                else
+                {
+                    e.CanExecute = false;
+                }
+            }
 
         }
 
