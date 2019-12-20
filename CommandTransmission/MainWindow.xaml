@@ -163,17 +163,17 @@
 									<DataGridTextColumn Header="命令标题"
 														Width="0.5*"
 														Binding="{Binding Title}" />
-									<DataGridTextColumn Header="目标站台"
+									<DataGridTextColumn Header="发令站台"
 														Width="0.3*"
-														Binding="{Binding Targets,Converter={StaticResource ResourceKey=cmdTargets}}" />
+														Binding="{Binding SourceName}" />
 								</DataGrid.Columns>
-								<DataGrid.RowStyle>
+								<!--<DataGrid.RowStyle>
 									<Style BasedOn="{StaticResource MetroDataGridRow}"
 										   TargetType="DataGridRow">
 										<EventSetter Event="MouseDoubleClick"
 													 Handler="ChangeEdittingCmd" />
 									</Style>
-								</DataGrid.RowStyle>
+								</DataGrid.RowStyle>-->
 							</DataGrid>
 						</Grid>
 						<Grid Grid.Row="3">
@@ -673,8 +673,7 @@
 								<ComboBoxItem Content="未缓存" />
 								<ComboBoxItem Content="已缓存" />
 								<ComboBoxItem Content="已下达" />
-								<ComboBoxItem Content="部分签收" />
-								<ComboBoxItem Content="全部签收" />
+								<ComboBoxItem Content="已签收" />
 							</ComboBox>
 							<ComboBox Grid.Column="5"
 									  Grid.Row="5"
@@ -713,7 +712,6 @@
 							<GroupBox Header="命令内容"
 									  Grid.Row="1">
 								<RichTextBox IsDocumentEnabled="True"
-											 TextChanged="CmdTb_TextChanged"
 											 Name="cmdTb">
 									<FlowDocument FontSize="15">
 										<Paragraph Padding="20"
@@ -753,6 +751,18 @@
 							  ItemsSource="{Binding Targets}"
 							  Grid.Row="1"
 							  Style="{x:Null}">
+						<DataGrid.Resources>
+							<ContextMenu x:Key="RowMenu">
+								<MenuItem Header="代签"
+										  Command="{Binding DataContext.AgentSign, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Controls:MetroWindow}}" />
+							</ContextMenu>
+						</DataGrid.Resources>
+						<DataGrid.RowStyle>
+							<Style TargetType="DataGridRow">
+								<Setter Property="ContextMenu"
+										Value="{StaticResource RowMenu}" />
+							</Style>
+						</DataGrid.RowStyle>
 						<DataGrid.CellStyle>
 							<Style TargetType="DataGridCell">
 								<Style.Triggers>
@@ -784,8 +794,11 @@
 											<Setter.Value>
 												<ControlTemplate>
 													<StackPanel VerticalAlignment="Center">
-														<StackPanel Margin="5,0,0,0">
-															<TextBlock Text="{Binding SignState}" />
+														<StackPanel Margin="5,0,0,0"
+																	Orientation="Horizontal">
+															<TextBlock Text="{Binding SignState}"
+																	   Foreground="Black"
+																	   Margin="0,0,10,0" />
 															<iconPacks:PackIconFontAwesome Kind="CheckCircleRegular"
 																						   Foreground="Green"
 																						   Visibility="{Binding IsSigned,Converter={StaticResource CheckVisible}}" />
@@ -799,7 +812,7 @@
 							</DataGridTemplateColumn>
 							<DataGridTextColumn Width="0.2*"
 												Header="签收人"
-												Binding="{Binding Checkee}" />
+												Binding="{Binding Signee}" />
 							<DataGridTextColumn Width="0.3*"
 												Header="签收时间"
 												Binding="{Binding CheckTime}" />

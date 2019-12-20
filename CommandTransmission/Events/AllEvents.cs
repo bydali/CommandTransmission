@@ -9,7 +9,10 @@ using YDMSG;
 namespace CommandTransmission
 {
     public class EditNewCommand : PubSubEvent<MsgDispatchCommand> { }
-    public class ReceiptCommand : PubSubEvent<MsgReceipt> { }
+    public class SignCommand : PubSubEvent<MsgSign> { }
+    public class AgentSignCommand : PubSubEvent<MsgSign> { }
     public class CacheCommand : PubSubEvent<MsgDispatchCommand> { }
+    public class ApproveCommand : PubSubEvent<MsgDispatchCommand> { }
+    public class TransmitCommand : PubSubEvent<MsgDispatchCommand> { }
 }
 

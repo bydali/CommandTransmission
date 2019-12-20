@@ -56,7 +56,8 @@ namespace CommandTransmission
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((bool)value)
+            var source = (bool)value;
+            if (source)
             {
                 return Visibility.Visible;
             }
@@ -99,10 +100,8 @@ namespace CommandTransmission
                     return 1;
                 case CmdState.已下达:
                     return 2;
-                case CmdState.部分签收:
+                case CmdState.已签收:
                     return 3;
-                case CmdState.全部签收:
-                    return 4;
                 default:
                     break;
             }
@@ -121,9 +120,7 @@ namespace CommandTransmission
                 case 2:
                     return CmdState.已下达;
                 case 3:
-                    return CmdState.部分签收;
-                case 4:
-                    return CmdState.全部签收;
+                    return CmdState.已签收;
             }
             return -1;
         }

@@ -38,7 +38,7 @@ namespace CommandTransmission
 
         public ObservableCollection<MsgDispatchCommand> CachedCmds { get; set; }
         public ObservableCollection<MsgDispatchCommand> SendCmds { get; set; }
-        public ObservableCollection<MsgDispatchCommand> ReceivedCmds { get; set; }
+        public ObservableCollection<object> ReceivedCmds { get; set; }
         public ObservableCollection<MsgDispatchCommand> SendingCmds { get; set; }
         public MsgDispatchCommand CurrentCmd
         {
@@ -100,7 +100,7 @@ namespace CommandTransmission
                 }
             }
             // 初始化 接收命令
-            ReceivedCmds = new ObservableCollection<MsgDispatchCommand>();
+            ReceivedCmds = new ObservableCollection<object>();
             using (XmlReader reader = XmlReader.Create("ReceivedCmds.xml"))
             {
                 while (!reader.EOF)
@@ -130,36 +130,80 @@ namespace CommandTransmission
             }
             else
             {
-                if ((CurrentCmd.CmdState == CmdState.已缓存)&&
-                    (CurrentCmd.NeedAuthorization==true))
+                if ((CurrentCmd.CmdState == CmdState.已缓存) &&
+                    (CurrentCmd.IsAuthorized == true))
+                {
+                    e.CanExecute = false;
+                }
+                else if ((CurrentCmd.CmdState == CmdState.已缓存) &&
+                    (CurrentCmd.NeedAuthorization == true))
                 {
                     e.CanExecute = true;
                 }
-                else 
+                else
                 {
                     e.CanExecute = false;
                 }
             }
         }
 
-        internal void SendCmdExecute(object sender, ExecutedRoutedEventArgs e)
-        {
-
-        }
-
         internal void SendCmdCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = false;
+            if (CurrentCmd != null)
+            {
+                if (CurrentCmd.CmdState == CmdState.已下达 ||
+                    CurrentCmd.CmdState == CmdState.已签收)
+                {
+                    e.CanExecute = false;
+                }
+                else
+                {
+                    if (CurrentCmd.IsCached)
+                    {
+                        if (CurrentCmd.NeedAuthorization &&
+                            CurrentCmd.IsAuthorized)
+                        {
+                            e.CanExecute = true;
+                        }
+                        else if (CurrentCmd.NeedAuthorization &&
+                            !CurrentCmd.IsAuthorized)
+                        {
+                            e.CanExecute = false;
+                        }
+                        else
+                        {
+                            e.CanExecute = true;
+                        }
+                    }
+                    else
+                    {
+                        e.CanExecute = false;
+                    }
+                }
+            }
+            else
+            {
+                e.CanExecute = false;
+            }
         }
 
         internal void AgentSignCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = false;
-        }
-
-        internal void AgentSignExecute(object sender, ExecutedRoutedEventArgs e)
-        {
-
+            if (CurrentCmd!=null)
+            {
+                if (CurrentCmd.CmdState == CmdState.已下达)
+                {
+                    e.CanExecute = true;
+                }
+                else
+                {
+                    e.CanExecute = false;
+                }
+            }
+            else
+            {
+                e.CanExecute = false;
+            }
         }
 
         internal void CacheCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -170,12 +214,8 @@ namespace CommandTransmission
             }
             else
             {
-                if (!(CurrentCmd.CmdState==CmdState.已缓存))
-                {
-                    e.CanExecute = true;
-                }
-                else if ((CurrentCmd.CmdState == CmdState.已缓存)
-                    && CurrentCmd.IsRead2Update)
+                if ((CurrentCmd.CmdState == CmdState.已缓存)
+                    || (CurrentCmd.CmdState == CmdState.未缓存))
                 {
                     e.CanExecute = true;
                 }
@@ -184,7 +224,6 @@ namespace CommandTransmission
                     e.CanExecute = false;
                 }
             }
-
         }
 
         private void Timer_Tick(object sender, EventArgs e)
