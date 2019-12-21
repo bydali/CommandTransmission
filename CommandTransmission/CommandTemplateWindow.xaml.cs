@@ -31,6 +31,7 @@ namespace CommandTransmission
         {
             this.eventAggregator = eventAggregator;
             GenerateTemplate();
+
             InitializeComponent();
         }
 
@@ -77,7 +78,7 @@ namespace CommandTransmission
         }
 
         /// <summary>
-        /// 生成模板命令的一个副本，因而使用反序列化
+        /// 生成模板命令的一个副本，因而使用序列化
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

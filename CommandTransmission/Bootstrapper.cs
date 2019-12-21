@@ -54,7 +54,10 @@ namespace CommandTransmission
         {
             base.ConfigureViewModelLocator();
             AppVM appVM = new AppVM(Container.Resolve<IEventAggregator>());
+            Container.RegisterInstance(appVM);
+
             ViewModelLocationProvider.Register<MainWindow>(() => { return appVM; });
+
         }
 
         protected override RegionAdapterMappings ConfigureRegionAdapterMappings()

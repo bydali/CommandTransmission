@@ -4,6 +4,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
 using System.Text;
@@ -16,13 +17,21 @@ using YDMSG;
 
 namespace CommandTransmission
 {
-    class AppVM : BindableBase
+    class AppVM : INotifyPropertyChanged
     {
         private IEventAggregator eventAggregator;
         private DispatcherTimer timer;
 
         private string appTitle;
-        public string AppTitle { get => appTitle; set { SetProperty(ref appTitle, value); } }
+        public string AppTitle
+        {
+            get => appTitle;
+            set
+            {
+                appTitle = value;
+                OnProPertyChanged(new PropertyChangedEventArgs("AppTitle"));
+            }
+        }
 
         private string user;
 
@@ -32,7 +41,8 @@ namespace CommandTransmission
             get => clock;
             set
             {
-                SetProperty(ref clock, value);
+                clock = value;
+                OnProPertyChanged(new PropertyChangedEventArgs("Clock"));
             }
         }
 
@@ -45,7 +55,8 @@ namespace CommandTransmission
             get => currentCmd;
             set
             {
-                SetProperty(ref currentCmd, value);
+                currentCmd = value;
+                OnProPertyChanged(new PropertyChangedEventArgs("CurrentCmd"));
             }
         }
         private MsgDispatchCommand currentCmd;
@@ -54,6 +65,24 @@ namespace CommandTransmission
         public RoutedUICommand ApplyFor { get; set; }
         public RoutedUICommand SendCmd { get; set; }
         public RoutedUICommand AgentSign { get; set; }
+
+        private ObservableCollection<MsgSpeedCommand> speedCmds;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnProPertyChanged(PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, e);
+        }
+
+        public ObservableCollection<MsgSpeedCommand> SpeedCmds
+        {
+            get { return speedCmds; }
+            set
+            {
+                speedCmds = value;
+                OnProPertyChanged(new PropertyChangedEventArgs("SpeedCmds"));
+            }
+        }
 
         internal AppVM(IEventAggregator eventAggregator)
         {
@@ -116,6 +145,8 @@ namespace CommandTransmission
             }
             BindingOperations.EnableCollectionSynchronization(CachedCmds, new object());
 
+            SpeedCmds = new ObservableCollection<MsgSpeedCommand>();
+
             CacheCmd = new RoutedUICommand();
             ApplyFor = new RoutedUICommand();
             SendCmd = new RoutedUICommand();
@@ -158,7 +189,7 @@ namespace CommandTransmission
                 }
                 else
                 {
-                    if (CurrentCmd.IsCached)
+                    if (CurrentCmd.CmdState == CmdState.已缓存)
                     {
                         if (CurrentCmd.NeedAuthorization &&
                             CurrentCmd.IsAuthorized)
@@ -189,7 +220,7 @@ namespace CommandTransmission
 
         internal void AgentSignCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentCmd!=null)
+            if (CurrentCmd != null)
             {
                 if (CurrentCmd.CmdState == CmdState.已下达)
                 {

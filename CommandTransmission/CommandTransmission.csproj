@@ -37,12 +37,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Communications, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\Communications.dll</HintPath>
+    </Reference>
     <Reference Include="ControlzEx">
       <HintPath>..\Libs\ControlzEx.dll</HintPath>
-    </Reference>
-    <Reference Include="DSIM.Communications, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libs\DSIM.Communications.dll</HintPath>
     </Reference>
     <Reference Include="EasyNetQ, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -121,11 +121,11 @@
     <Compile Include="Converter\SimpleConvert.cs" />
     <Compile Include="Events\AllEvents.cs" />
     <Compile Include="IO.cs" />
-    <Compile Include="SpeedCommandManageWindow.xaml.cs">
-      <DependentUpon>SpeedCommandManageWindow.xaml</DependentUpon>
+    <Compile Include="SpeedManageWindow.xaml.cs">
+      <DependentUpon>SpeedManageWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SpeedLimitedCommandWindow.xaml.cs">
-      <DependentUpon>SpeedLimitedCommandWindow.xaml</DependentUpon>
+    <Compile Include="NewSpeedWindow.xaml.cs">
+      <DependentUpon>NewSpeedWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\AppVM.cs" />
     <Compile Include="ViewModel\CmdTemplate.cs" />
@@ -149,11 +149,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SpeedCommandManageWindow.xaml">
+    <Page Include="SpeedManageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SpeedLimitedCommandWindow.xaml">
+    <Page Include="NewSpeedWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -192,8 +192,8 @@
     <Resource Include="Config\CachedCmds.xml" />
     <Resource Include="Config\SendCmds.xml" />
     <Resource Include="Config\ReceivedCmds.xml" />
+    <Content Include="Libs\Communications.dll" />
     <Content Include="Libs\ControlzEx.dll" />
-    <Content Include="Libs\DSIM.Communications.dll" />
     <Content Include="Libs\EasyNetQ.dll" />
     <Content Include="Libs\MahApps.Metro.IconPacks.dll" />
     <Content Include="Libs\Microsoft.Diagnostics.Tracing.EventSource.dll" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -123,6 +124,54 @@ namespace CommandTransmission
                     return CmdState.已签收;
             }
             return -1;
+        }
+    }
+
+    // 已激活的列控命令
+    class ActivatedSpeedCmds : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var source = (ObservableCollection<MsgSpeedCommand>)value;
+            var result = source.Where(i => i.SpeedCmdState == SpeedCmdState.已激活);
+            return result;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // 已设置的列控命令
+    class SettedSpeedCmds : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var source = (ObservableCollection<MsgSpeedCommand>)value;
+            var result = source.Where(i => i.SpeedCmdState == SpeedCmdState.已设置);
+            return result;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // 已拟定的列控命令
+    class SketchSpeedCmds : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var source = (ObservableCollection<MsgSpeedCommand>)value;
+            var result = source.Where(i => i.SpeedCmdState == SpeedCmdState.已拟定);
+            return result;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 

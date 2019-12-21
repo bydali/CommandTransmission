@@ -76,7 +76,7 @@
 									<Button Content="刷新"
 											Margin="5,0,0,0" />
 									<Button Content="新建调度命令"
-											Click="CmdTemplateClick"
+											Click="TryCmdTemplateWindow"
 											Margin="5,0,0,0" />
 								</StackPanel>
 							</StackPanel>
@@ -98,6 +98,7 @@
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
+									  GridLinesVisibility="All"
 									  Name="cachedCmdsDg"
 									  SelectionMode="Single"
 									  ItemsSource="{Binding CachedCmds}"
@@ -105,14 +106,6 @@
 									  CanUserAddRows="False"
 									  AutoGenerateColumns="False"
 									  Visibility="{Binding ElementName=cacheToggle,Path=IsChecked,Converter={StaticResource cmdListVisible}}">
-								<DataGrid.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="删除指定缓存"
-												  Click="DeleteTheCache" />
-										<MenuItem Header="删除所有缓存"
-												  Click="DeleteAllCache" />
-									</ContextMenu>
-								</DataGrid.ContextMenu>
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="命令号"
 														Width="0.2*"
@@ -128,7 +121,7 @@
 									<Style BasedOn="{StaticResource MetroDataGridRow}"
 										   TargetType="DataGridRow">
 										<EventSetter Event="MouseDoubleClick"
-													 Handler="ChangeEdittingCmd" />
+													 Handler="TryChangeCurrentCmd" />
 									</Style>
 								</DataGrid.RowStyle>
 							</DataGrid>
@@ -150,6 +143,7 @@
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
+									  GridLinesVisibility="All"
 									  IsReadOnly="True"
 									  Name="receivedCmdsDg"
 									  ItemsSource="{Binding ReceivedCmds}"
@@ -193,6 +187,7 @@
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
+									  GridLinesVisibility="All"
 									  IsReadOnly="True"
 									  Name="sendingCmdsDg"
 									  ItemsSource="{Binding SendingCmds}"
@@ -214,7 +209,7 @@
 									<Style BasedOn="{StaticResource MetroDataGridRow}"
 										   TargetType="DataGridRow">
 										<EventSetter Event="MouseDoubleClick"
-													 Handler="ChangeEdittingCmd" />
+													 Handler="TryChangeCurrentCmd" />
 									</Style>
 								</DataGrid.RowStyle>
 							</DataGrid>
@@ -236,6 +231,7 @@
 								</ToggleButton>
 							</Grid>
 							<DataGrid Grid.Row="1"
+									  GridLinesVisibility="All"
 									  IsReadOnly="True"
 									  Name="sendCmdsDg"
 									  ItemsSource="{Binding SendCmds}"
@@ -257,7 +253,7 @@
 									<Style BasedOn="{StaticResource MetroDataGridRow}"
 										   TargetType="DataGridRow">
 										<EventSetter Event="MouseDoubleClick"
-													 Handler="ChangeEdittingCmd" />
+													 Handler="TryChangeCurrentCmd" />
 									</Style>
 								</DataGrid.RowStyle>
 							</DataGrid>
@@ -627,7 +623,7 @@
 									 Grid.ColumnSpan="4" />
 							<Button Grid.Column="5"
 									HorizontalAlignment="Left"
-									Click="CmdTemplateClick"
+									Click="TryCmdTemplateWindow"
 									Width="35"
 									Margin="10,0,0,0">
 								<iconPacks:Entypo Kind="NewMessage"
@@ -739,7 +735,8 @@
 						<Label Content="受令列表"
 							   VerticalAlignment="Center" />
 						<CheckBox Content="全选"
-								  IsChecked="{Binding Is2AllStation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+								  Checked="SelectAll"
+								  Unchecked="UnSelectAll"
 								  Grid.Column="1" />
 						<Button Content="按组选站"
 								Grid.Column="2"
@@ -830,9 +827,6 @@
 									Margin="20,0,0,0" />
 							<Button Content="下达"
 									Command="{Binding ElementName=TopWindow,Path=DataContext.SendCmd}"
-									Margin="20,0,0,0" />
-							<Button Content="代签"
-									Command="{Binding ElementName=TopWindow,Path=DataContext.AgentSign}"
 									Margin="20,0,0,0" />
 						</StackPanel>
 					</Grid>
