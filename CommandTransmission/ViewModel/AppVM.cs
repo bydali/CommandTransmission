@@ -22,6 +22,8 @@ namespace CommandTransmission
         private IEventAggregator eventAggregator;
         private DispatcherTimer timer;
 
+        private string user;
+
         private string appTitle;
         public string AppTitle
         {
@@ -32,8 +34,6 @@ namespace CommandTransmission
                 OnProPertyChanged(new PropertyChangedEventArgs("AppTitle"));
             }
         }
-
-        private string user;
 
         private string clock;
         public string Clock
@@ -50,6 +50,18 @@ namespace CommandTransmission
         public ObservableCollection<MsgDispatchCommand> SendCmds { get; set; }
         public ObservableCollection<object> ReceivedCmds { get; set; }
         public ObservableCollection<MsgDispatchCommand> SendingCmds { get; set; }
+
+        private ObservableCollection<MsgSpeedCommand> speedCmds;
+        public ObservableCollection<MsgSpeedCommand> SpeedCmds
+        {
+            get { return speedCmds; }
+            set
+            {
+                speedCmds = value;
+                OnProPertyChanged(new PropertyChangedEventArgs("SpeedCmds"));
+            }
+        }
+
         public MsgDispatchCommand CurrentCmd
         {
             get => currentCmd;
@@ -66,22 +78,10 @@ namespace CommandTransmission
         public RoutedUICommand SendCmd { get; set; }
         public RoutedUICommand AgentSign { get; set; }
 
-        private ObservableCollection<MsgSpeedCommand> speedCmds;
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnProPertyChanged(PropertyChangedEventArgs e)
         {
             PropertyChanged?.Invoke(this, e);
-        }
-
-        public ObservableCollection<MsgSpeedCommand> SpeedCmds
-        {
-            get { return speedCmds; }
-            set
-            {
-                speedCmds = value;
-                OnProPertyChanged(new PropertyChangedEventArgs("SpeedCmds"));
-            }
         }
 
         internal AppVM(IEventAggregator eventAggregator)

@@ -78,9 +78,22 @@ namespace CommandTransmission
 
         private void RegisterALLEvent()
         {
-            eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
-            eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
+            RegisterLocalEvent();
+            RegisterMQRead();
+            RegisterMQWrite();
+        }
 
+        private void RegisterMQWrite()
+        {
+            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
+            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
+
+            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
+            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
+        }
+
+        private void RegisterMQRead()
+        {
             eventAggregator.GetEvent<CacheCommand>().Unsubscribe(UpdateCacheCmd);
             eventAggregator.GetEvent<CacheCommand>().Subscribe(UpdateCacheCmd, ThreadOption.UIThread);
 
@@ -96,14 +109,8 @@ namespace CommandTransmission
             eventAggregator.GetEvent<AgentSignCommand>().Unsubscribe(TargetSignCmd);
             eventAggregator.GetEvent<AgentSignCommand>().Subscribe(TargetSignCmd, ThreadOption.UIThread);
 
-            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
-            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
-
             eventAggregator.GetEvent<CheckSpeedCommand>().Unsubscribe(CheckSpeedCmd);
             eventAggregator.GetEvent<CheckSpeedCommand>().Subscribe(CheckSpeedCmd, ThreadOption.UIThread);
-
-            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
-            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
 
             eventAggregator.GetEvent<CacheSpeedCommand>().Unsubscribe(CacheSpeedCmd);
             eventAggregator.GetEvent<CacheSpeedCommand>().Subscribe(CacheSpeedCmd, ThreadOption.UIThread);
@@ -115,6 +122,16 @@ namespace CommandTransmission
             eventAggregator.GetEvent<ExecuteSpeedCommand>().Subscribe(ExecuteSpeedCmd, ThreadOption.UIThread);
         }
 
+        private void RegisterLocalEvent()
+        {
+            eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
+            eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
+        }
+
+        /// <summary>
+        /// 收到广播到本地的列控命令，置状态为已设置
+        /// </summary>
+        /// <param name="cmd"></param>
         private void ExecuteSpeedCmd(MsgSpeedCommand cmd)
         {
             var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
@@ -125,6 +142,10 @@ namespace CommandTransmission
             }
         }
 
+        /// <summary>
+        /// 收到广播到本地的列控命令，置状态为已激活
+        /// </summary>
+        /// <param name="cmd"></param>
         private void ActiveSpeedCmd(MsgSpeedCommand cmd)
         {
             var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
