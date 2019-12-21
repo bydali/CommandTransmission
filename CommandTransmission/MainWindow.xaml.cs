@@ -83,13 +83,43 @@ namespace CommandTransmission
             RegisterMQWrite();
         }
 
-        private void RegisterMQWrite()
+        private void RegisterLocalEvent()
         {
-            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
-            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
+            eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
+            eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
+        }
 
-            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
-            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
+        /// <summary>
+        /// 从模板窗口传递一个命令副本到主窗口编辑界面
+        /// </summary>
+        /// <param name="data"></param>
+        private void NewEdittingCmd(MsgDispatchCommand data)
+        {
+            int count = ((AppVM)DataContext).CachedCmds.Count +
+                ((AppVM)DataContext).SendingCmds.Count +
+                ((AppVM)DataContext).SendCmds.Count;
+
+            data.CmdSN = (count + 1).ToString();
+
+            //新命令的上下文数据
+            var appVM = (AppVM)DataContext;
+            appVM.CurrentCmd = data;
+
+            CmdParagraph.Inlines.Clear();
+
+            var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
+            for (int i = 0; i < lst.Length; i++)
+            {
+                Run r = new Run(lst[i]);
+                CmdParagraph.Inlines.Add(r);
+
+                if (i != lst.Length - 1)
+                {
+                    Hyperlink hl = new Hyperlink();
+                    hl.Inlines.Add(new Run("        "));
+                    CmdParagraph.Inlines.Add(hl);
+                }
+            }
         }
 
         private void RegisterMQRead()
@@ -122,24 +152,116 @@ namespace CommandTransmission
             eventAggregator.GetEvent<ExecuteSpeedCommand>().Subscribe(ExecuteSpeedCmd, ThreadOption.UIThread);
         }
 
-        private void RegisterLocalEvent()
+        /// <summary>
+        /// 处理网络广播到本地的缓存命令(包含第一次创建)
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void UpdateCacheCmd(MsgDispatchCommand cmd)
         {
-            eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
-            eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
+            var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
+            if (result.Count() != 0)
+            {
+                if (((AppVM)DataContext).CachedCmds.Count != 0)
+                {
+                    ((AppVM)DataContext).CachedCmds.Remove(result.First());
+                }
+            }
+
+            ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
+            ((AppVM)DataContext).CurrentCmd = cmd;
+
+            CmdParagraph.Inlines.Clear();
+            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
+
+            cmd.CmdState = CmdState.已缓存;
         }
 
         /// <summary>
-        /// 收到广播到本地的列控命令，置状态为已设置
+        /// 处理网络广播到本地的申请消息
         /// </summary>
         /// <param name="cmd"></param>
-        private void ExecuteSpeedCmd(MsgSpeedCommand cmd)
+        private void ApproveCmd(MsgDispatchCommand cmd)
         {
-            var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
+            var user = ConfigurationManager.ConnectionStrings["User"].ConnectionString;
+            var result = cmd.Targets.Where(i => i.Name == user);
+            // 这里客户端的用户应该是值班主任
             if (result.Count() != 0)
             {
-                result.First().SpeedCmdState = SpeedCmdState.已设置;
-                ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
+                var oldCmd = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN).First();
+                ((AppVM)DataContext).CachedCmds.Remove(oldCmd);
+                ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
+                ((AppVM)DataContext).CurrentCmd = cmd;
+
+                if (MessageBox.Show("当前命令正在申请批准，请选择是否批准", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                        MessageBoxResult.Yes)
+                {
+                    cmd.Approve();
+                    CacheExecute(null, null);
+                }
             }
+        }
+
+        /// <summary>
+        /// 处理网络广播到本地的下达命令
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void TransmitCmd(MsgDispatchCommand cmd)
+        {
+            var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
+            ((AppVM)DataContext).CachedCmds.Remove(result.First());
+
+            ((AppVM)DataContext).SendingCmds.Insert(0, cmd);
+            ((AppVM)DataContext).CurrentCmd = cmd;
+
+            CmdParagraph.Inlines.Clear();
+            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
+
+            cmd.CmdState = CmdState.已下达;
+        }
+
+        /// <summary>
+        /// 处理网络广播到本地的签收回执
+        /// </summary>
+        /// <param name="data"></param>
+        private void TargetSignCmd(MsgCommandSign data)
+        {
+            var cmd = ((AppVM)DataContext).SendingCmds.Where(i => i.CmdSN == data.CmdSN).First();
+            cmd.OneTargetSigned(data);
+
+            if (cmd.CmdState == CmdState.已签收)
+            {
+                ((AppVM)DataContext).SendingCmds.Remove(cmd);
+                ((AppVM)DataContext).SendCmds.Insert(0, cmd);
+            }
+
+            ((AppVM)DataContext).ReceivedCmds.Insert(0, data);
+        }
+
+        /// <summary>
+        /// 校验广播到本地的列控命令
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void CheckSpeedCmd(MsgSpeedCommand cmd)
+        {
+            // 非此命令编辑用户才能校验
+            if (cmd.User != ConfigurationManager.ConnectionStrings["User"].ConnectionString)
+            {
+                NewSpeedWindow window = new NewSpeedWindow(eventAggregator, cmd, true);
+                window.Show();
+            }
+        }
+
+        /// <summary>
+        /// 收到广播到本地的列控命令，加入缓存
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void CacheSpeedCmd(MsgSpeedCommand cmd)
+        {
+            UpdateCacheCmd(cmd);
+
+            cmd.SpeedCmdState = SpeedCmdState.已拟定;
+            ((AppVM)DataContext).SpeedCmds.Add(cmd);
+            ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
         }
 
         /// <summary>
@@ -157,16 +279,35 @@ namespace CommandTransmission
         }
 
         /// <summary>
-        /// 收到广播到本地的列控命令，加入缓存
+        /// 收到广播到本地的列控命令，置状态为已设置
         /// </summary>
         /// <param name="cmd"></param>
-        private void CacheSpeedCmd(MsgSpeedCommand cmd)
+        private void ExecuteSpeedCmd(MsgSpeedCommand cmd)
         {
-            UpdateCacheCmd(cmd);
+            var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
+            if (result.Count() != 0)
+            {
+                result.First().SpeedCmdState = SpeedCmdState.已设置;
+                ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
+            }
+        }
 
-            cmd.SpeedCmdState = SpeedCmdState.已拟定;
-            ((AppVM)DataContext).SpeedCmds.Add(cmd);
-            ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
+        private void RegisterMQWrite()
+        {
+            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
+            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
+
+            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
+            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
+        }
+
+        /// <summary>
+        /// 广播列控命令等待校验
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void SendSpeedCmd(MsgSpeedCommand cmd)
+        {
+            SendCmd("DSIM.Command.Check", cmd);
         }
 
         /// <summary>
@@ -187,28 +328,8 @@ namespace CommandTransmission
             MessageBox.Show("完成校验,已缓存");
         }
 
-        /// <summary>
-        /// 校验广播到本地的列控命令
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void CheckSpeedCmd(MsgSpeedCommand cmd)
-        {
-            // 非此命令编辑用户才能校验
-            if (cmd.User != ConfigurationManager.ConnectionStrings["User"].ConnectionString)
-            {
-                NewSpeedWindow window = new NewSpeedWindow(eventAggregator, cmd, true);
-                window.Show();
-            }
-        }
 
-        /// <summary>
-        /// 广播列控命令等待校验
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void SendSpeedCmd(MsgSpeedCommand cmd)
-        {
-            SendCmd("DSIM.Command.Check", cmd);
-        }
+        #region 界面按钮事件
 
         /// <summary>
         /// 尝试打开命令模板窗口
@@ -252,6 +373,43 @@ namespace CommandTransmission
             else
             {
                 ShowCmdTemplateWindow();
+            }
+        }
+
+        /// <summary>
+        /// 尝试双击切换命令界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TryChangeCurrentCmd(object sender, MouseButtonEventArgs e)
+        {
+            var cmd = (MsgDispatchCommand)((DataGridRow)sender).DataContext;
+
+            // 若不是缓存状态，则直接切换
+            if (cmd.CmdState != CmdState.已缓存)
+            {
+                SetCurrentCmd(cmd);
+            }
+            else
+            {
+                // 为缓存状态且已被修改
+                if (((AppVM)DataContext).CurrentCmd.CmdState == CmdState.已缓存 &&
+                ((AppVM)DataContext).CurrentCmd.IsRead2Update)
+                {
+                    if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                        MessageBoxResult.Yes)
+                    {
+                        CacheExecute(null, null);
+                    }
+                    else
+                    {
+                        ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
+                    }
+                }
+                else
+                {
+                    SetCurrentCmd(cmd);
+                }
             }
         }
 
@@ -341,6 +499,62 @@ namespace CommandTransmission
         }
 
         /// <summary>
+        /// 全选为受令单位
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectAll(object sender, RoutedEventArgs e)
+        {
+            if (allStationDg.ItemsSource != null)
+            {
+                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
+                {
+                    item.IsSelected = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 取消全选为受令单位
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UnSelectAll(object sender, RoutedEventArgs e)
+        {
+            if (allStationDg.ItemsSource != null)
+            {
+                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
+                {
+                    item.IsSelected = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 新建列控命令窗口
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CreateCommand(object sender, RoutedEventArgs e)
+        {
+            NewSpeedWindow window = new NewSpeedWindow(eventAggregator, null);
+            window.ShowDialog();
+        }
+
+        /// <summary>
+        /// 打开列控管理窗口
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SpeedManage(object sender, RoutedEventArgs e)
+        {
+            SpeedManageWindow window = container.Resolve<SpeedManageWindow>();
+            window.ShowDialog();
+        }
+
+        #endregion
+
+        /// <summary>
         /// 按主题发送命令
         /// </summary>
         /// <param name="topic"></param>
@@ -392,124 +606,6 @@ namespace CommandTransmission
         }
 
         /// <summary>
-        /// 新建一个命令到编辑界面
-        /// </summary>
-        /// <param name="data"></param>
-        private void NewEdittingCmd(MsgDispatchCommand data)
-        {
-            int count = ((AppVM)DataContext).CachedCmds.Count +
-                ((AppVM)DataContext).SendingCmds.Count +
-                ((AppVM)DataContext).SendCmds.Count;
-
-            data.CmdSN = (count + 1).ToString();
-
-            //新命令的上下文数据
-            var appVM = (AppVM)DataContext;
-            appVM.CurrentCmd = data;
-
-            CmdParagraph.Inlines.Clear();
-
-            var lst = data.Content.ToString().Split(new string[] { "***" }, StringSplitOptions.None);
-            for (int i = 0; i < lst.Length; i++)
-            {
-                Run r = new Run(lst[i]);
-                CmdParagraph.Inlines.Add(r);
-
-                if (i != lst.Length - 1)
-                {
-                    Hyperlink hl = new Hyperlink();
-                    hl.Inlines.Add(new Run("        "));
-                    CmdParagraph.Inlines.Add(hl);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 处理网络广播到本地的缓存命令(包含第一次创建)
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void UpdateCacheCmd(MsgDispatchCommand cmd)
-        {
-            var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
-            if (result.Count() != 0)
-            {
-                if (((AppVM)DataContext).CachedCmds.Count != 0)
-                {
-                    ((AppVM)DataContext).CachedCmds.Remove(result.First());
-                }
-            }
-
-            ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
-            ((AppVM)DataContext).CurrentCmd = cmd;
-
-            CmdParagraph.Inlines.Clear();
-            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
-
-            cmd.CmdState = CmdState.已缓存;
-        }
-
-        /// <summary>
-        /// 处理网络广播到本地的申请消息
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void ApproveCmd(MsgDispatchCommand cmd)
-        {
-            var user = ConfigurationManager.ConnectionStrings["User"].ConnectionString;
-            var result = cmd.Targets.Where(i => i.Name == user);
-            // 这里客户端的用户应该是值班主任
-            if (result.Count() != 0)
-            {
-                var oldCmd = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN).First();
-                ((AppVM)DataContext).CachedCmds.Remove(oldCmd);
-                ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
-                ((AppVM)DataContext).CurrentCmd = cmd;
-
-                if (MessageBox.Show("当前命令正在申请批准，请选择是否批准", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
-                        MessageBoxResult.Yes)
-                {
-                    cmd.Approve();
-                    CacheExecute(null, null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 处理网络广播到本地的下达命令
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void TransmitCmd(MsgDispatchCommand cmd)
-        {
-            var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
-            ((AppVM)DataContext).CachedCmds.Remove(result.First());
-
-            ((AppVM)DataContext).SendingCmds.Insert(0, cmd);
-            ((AppVM)DataContext).CurrentCmd = cmd;
-
-            CmdParagraph.Inlines.Clear();
-            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
-
-            cmd.CmdState = CmdState.已下达;
-        }
-
-        /// <summary>
-        /// 处理网络广播到本地的签收回执
-        /// </summary>
-        /// <param name="data"></param>
-        private void TargetSignCmd(MsgCommandSign data)
-        {
-            var cmd = ((AppVM)DataContext).SendingCmds.Where(i => i.CmdSN == data.CmdSN).First();
-            cmd.OneTargetSigned(data);
-
-            if (cmd.CmdState == CmdState.已签收)
-            {
-                ((AppVM)DataContext).SendingCmds.Remove(cmd);
-                ((AppVM)DataContext).SendCmds.Insert(0, cmd);
-            }
-
-            ((AppVM)DataContext).ReceivedCmds.Insert(0, data);
-        }
-
-        /// <summary>
         /// 打开命令模板窗口
         /// </summary>
         private void ShowCmdTemplateWindow()
@@ -523,43 +619,6 @@ namespace CommandTransmission
             {
                 var window = Application.Current.Windows.OfType<CommandTemplateWindow>().First();
                 window.WindowState = WindowState.Normal;
-            }
-        }
-
-        /// <summary>
-        /// 尝试双击切换命令界面
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TryChangeCurrentCmd(object sender, MouseButtonEventArgs e)
-        {
-            var cmd = (MsgDispatchCommand)((DataGridRow)sender).DataContext;
-
-            // 若不是缓存状态，则直接切换
-            if (cmd.CmdState != CmdState.已缓存)
-            {
-                SetCurrentCmd(cmd);
-            }
-            else
-            {
-                // 为缓存状态且已被修改
-                if (((AppVM)DataContext).CurrentCmd.CmdState == CmdState.已缓存 &&
-                ((AppVM)DataContext).CurrentCmd.IsRead2Update)
-                {
-                    if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
-                        MessageBoxResult.Yes)
-                    {
-                        CacheExecute(null, null);
-                    }
-                    else
-                    {
-                        ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
-                    }
-                }
-                else
-                {
-                    SetCurrentCmd(cmd);
-                }
             }
         }
 
@@ -580,38 +639,5 @@ namespace CommandTransmission
             Process.GetCurrentProcess().Kill();
         }
 
-        private void CreateCommand(object sender, RoutedEventArgs e)
-        {
-            NewSpeedWindow window = new NewSpeedWindow(eventAggregator, null);
-            window.ShowDialog();
-        }
-
-        private void SpeedManage(object sender, RoutedEventArgs e)
-        {
-            SpeedManageWindow window = container.Resolve<SpeedManageWindow>();
-            window.ShowDialog();
-        }
-
-        private void SelectAll(object sender, RoutedEventArgs e)
-        {
-            if (allStationDg.ItemsSource != null)
-            {
-                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
-                {
-                    item.IsSelected = true;
-                }
-            }
-        }
-
-        private void UnSelectAll(object sender, RoutedEventArgs e)
-        {
-            if (allStationDg.ItemsSource != null)
-            {
-                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
-                {
-                    item.IsSelected = false;
-                }
-            }
-        }
     }
 }
