@@ -8,7 +8,8 @@
 					  mc:Ignorable="d"
 					  Title="新建限速命令"
 					  Width="550"
-					  Height="450">
+					  Height="450"
+					  GlowBrush="{DynamicResource AccentColorBrush}">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition />

@@ -32,7 +32,7 @@ namespace CommandTransmission
                     using (IModel im = conn.CreateModel())
                     {
                         List<string> allTopic = new List<string>()
-                        { "DSIM.Command.Create",
+                        {
                         "DSIM.Command.Update",
                         "DSIM.Command.Approve",
                         "DSIM.Command.Transmit",
@@ -67,10 +67,6 @@ namespace CommandTransmission
 
                                     switch (suffix)
                                     {
-                                        case ("DSIM.Command.Create"):
-                                            var data = JsonConvert.DeserializeObject<MsgDispatchCommand>(content);
-                                            eventAggregator.GetEvent<CacheCommand>().Publish(data);
-                                            break;
                                         case ("DSIM.Command.Update"):
                                             var data1 = JsonConvert.DeserializeObject<MsgDispatchCommand>(content);
                                             eventAggregator.GetEvent<CacheCommand>().Publish(data1);
@@ -127,7 +123,7 @@ namespace CommandTransmission
         /// </summary>
         /// <param name="msg"></param>
         /// <param name="topic"></param>
-        public static void SendMsg(object msg,string topic)
+        public static void SendMsg(object msg, string topic)
         {
             // 以下为测试代码
             ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin" };

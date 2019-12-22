@@ -34,6 +34,38 @@ namespace CommandTransmission
         private IEventAggregator eventAggregator;
         private IUnityContainer container;
 
+        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Process.GetCurrentProcess().Kill();
+        }
+
+        /// <summary>
+        /// 将当前命令的内容全部转为字符串（暂时没有找到流文档的序列化方式）
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        private string FillCmdContent()
+        {
+            string s = "";
+
+            foreach (var item in CmdParagraph.Inlines)
+            {
+                if (item is Run)
+                {
+                    s += ((Run)item).Text;
+                }
+                else
+                {
+                    foreach (Run fill in ((Hyperlink)item).Inlines)
+                    {
+                        s += fill.Text;
+                    }
+                }
+            }
+
+            return s;
+        }
+
         public MainWindow(IEventAggregator eventAggregator,
            IUnityContainer container)
         {
@@ -42,49 +74,19 @@ namespace CommandTransmission
 
             InitializeComponent();
 
-            SetCommandBindings();
-            RegisterALLEvent();
+            RegisterLocalEvent();
+            RegisterMQIO();
 
             IO.ReceiveMsg(eventAggregator);
         }
 
         /// <summary>
-        /// 为界面命令管理按钮设置Command
+        /// 注册程序内部事件
         /// </summary>
-        private void SetCommandBindings()
-        {
-            var appVM = (AppVM)DataContext;
-            CommandBindings.Add(
-                new CommandBinding(
-                    appVM.CacheCmd,
-                    CacheExecute,
-                    appVM.CacheCanExecute));
-            CommandBindings.Add(
-                new CommandBinding(
-                    appVM.ApplyFor,
-                    ApplyForExecute,
-                    appVM.ApplyForCanExecute));
-            CommandBindings.Add(
-                new CommandBinding(
-                    appVM.SendCmd,
-                    SendCmdExecute,
-                    appVM.SendCmdCanExecute));
-            CommandBindings.Add(
-                new CommandBinding(
-                    appVM.AgentSign,
-                    AgentSignExecute,
-                    appVM.AgentSignCanExecute));
-        }
-
-        private void RegisterALLEvent()
-        {
-            RegisterLocalEvent();
-            RegisterMQRead();
-            RegisterMQWrite();
-        }
-
         private void RegisterLocalEvent()
         {
+            var appVM = (AppVM)DataContext;
+
             eventAggregator.GetEvent<EditNewCommand>().Unsubscribe(NewEdittingCmd);
             eventAggregator.GetEvent<EditNewCommand>().Subscribe(NewEdittingCmd);
         }
@@ -122,38 +124,87 @@ namespace CommandTransmission
             }
         }
 
-        private void RegisterMQRead()
+        /// <summary>
+        /// 注册网络IO事件对
+        /// </summary>
+        private void RegisterMQIO()
         {
+            var appVM = (AppVM)DataContext;
+
+            // 缓存的发与收
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.CacheCmd,
+                    CacheExecute,
+                    appVM.CacheCanExecute));
             eventAggregator.GetEvent<CacheCommand>().Unsubscribe(UpdateCacheCmd);
             eventAggregator.GetEvent<CacheCommand>().Subscribe(UpdateCacheCmd, ThreadOption.UIThread);
 
+            // 申请的发与收
+            CommandBindings.Add(
+               new CommandBinding(
+                   appVM.ApplyFor,
+                   ApplyForExecute,
+                   appVM.ApplyForCanExecute));
             eventAggregator.GetEvent<ApproveCommand>().Unsubscribe(ApproveCmd);
             eventAggregator.GetEvent<ApproveCommand>().Subscribe(ApproveCmd, ThreadOption.UIThread);
 
+            // 下达的发与收
+            CommandBindings.Add(
+               new CommandBinding(
+                   appVM.SendCmd,
+                   SendCmdExecute,
+                   appVM.SendCmdCanExecute));
             eventAggregator.GetEvent<TransmitCommand>().Unsubscribe(TransmitCmd);
             eventAggregator.GetEvent<TransmitCommand>().Subscribe(TransmitCmd, ThreadOption.UIThread);
 
-            eventAggregator.GetEvent<SignCommand>().Unsubscribe(TargetSignCmd);
-            eventAggregator.GetEvent<SignCommand>().Subscribe(TargetSignCmd, ThreadOption.UIThread);
-
+            // 代签的发与收
+            CommandBindings.Add(
+                new CommandBinding(
+                    appVM.AgentSign,
+                    AgentSignExecute,
+                    appVM.AgentSignCanExecute));
             eventAggregator.GetEvent<AgentSignCommand>().Unsubscribe(TargetSignCmd);
             eventAggregator.GetEvent<AgentSignCommand>().Subscribe(TargetSignCmd, ThreadOption.UIThread);
 
+            // 收到车站签收
+            eventAggregator.GetEvent<SignCommand>().Unsubscribe(TargetSignCmd);
+            eventAggregator.GetEvent<SignCommand>().Subscribe(TargetSignCmd, ThreadOption.UIThread);
+
+            // 列控的发起与校验
+            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
+            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
             eventAggregator.GetEvent<CheckSpeedCommand>().Unsubscribe(CheckSpeedCmd);
             eventAggregator.GetEvent<CheckSpeedCommand>().Subscribe(CheckSpeedCmd, ThreadOption.UIThread);
 
+            // 列控通过的广播与收到后的缓存
+            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
+            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
             eventAggregator.GetEvent<CacheSpeedCommand>().Unsubscribe(CacheSpeedCmd);
             eventAggregator.GetEvent<CacheSpeedCommand>().Subscribe(CacheSpeedCmd, ThreadOption.UIThread);
 
+            // 收到列控的激活
             eventAggregator.GetEvent<ActiveSpeedCommand>().Unsubscribe(ActiveSpeedCmd);
             eventAggregator.GetEvent<ActiveSpeedCommand>().Subscribe(ActiveSpeedCmd, ThreadOption.UIThread);
 
+            // 收到列控的执行
             eventAggregator.GetEvent<ExecuteSpeedCommand>().Unsubscribe(ExecuteSpeedCmd);
             eventAggregator.GetEvent<ExecuteSpeedCommand>().Subscribe(ExecuteSpeedCmd, ThreadOption.UIThread);
         }
 
         /// <summary>
-        /// 处理网络广播到本地的缓存命令(包含第一次创建)
+        /// 缓存按钮事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CacheExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            var cmd = ((AppVM)DataContext).CurrentCmd;
+            SendCmd("DSIM.Command.Update", ((AppVM)DataContext).CurrentCmd);
+        }
+
+        /// <summary>
+        /// 处理网络广播到本地的缓存命令
         /// </summary>
         /// <param name="cmd"></param>
         private void UpdateCacheCmd(MsgDispatchCommand cmd)
@@ -177,6 +228,32 @@ namespace CommandTransmission
         }
 
         /// <summary>
+        /// 申请批准按钮事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ApplyForExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            // 当前命令已被修改过
+            if (((AppVM)DataContext).CurrentCmd.IsRead2Update)
+            {
+                if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                        MessageBoxResult.Yes)
+                {
+                    CacheExecute(null, null);
+                }
+                else
+                {
+                    ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
+                }
+            }
+            else
+            {
+                SendCmd("DSIM.Command.Approve", ((AppVM)DataContext).CurrentCmd);
+            }
+        }
+
+        /// <summary>
         /// 处理网络广播到本地的申请消息
         /// </summary>
         /// <param name="cmd"></param>
@@ -184,7 +261,8 @@ namespace CommandTransmission
         {
             var user = ConfigurationManager.ConnectionStrings["User"].ConnectionString;
             var result = cmd.Targets.Where(i => i.Name == user);
-            // 这里客户端的用户应该是值班主任
+
+            // 这里客户端的用户应该是"值班主任"
             if (result.Count() != 0)
             {
                 var oldCmd = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN).First();
@@ -192,13 +270,23 @@ namespace CommandTransmission
                 ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
                 ((AppVM)DataContext).CurrentCmd = cmd;
 
-                if (MessageBox.Show("当前命令正在申请批准，请选择是否批准", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                if (MessageBox.Show("当前命令正在申请批准，请审阅并选择是否批准", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
                         MessageBoxResult.Yes)
                 {
                     cmd.Approve();
                     CacheExecute(null, null);
                 }
             }
+        }
+
+        /// <summary>
+        /// 点击下达按钮触发
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SendCmdExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            SendCmd("DSIM.Command.Transmit", ((AppVM)DataContext).CurrentCmd);
         }
 
         /// <summary>
@@ -220,6 +308,37 @@ namespace CommandTransmission
         }
 
         /// <summary>
+        /// 代签下达的命令
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void AgentSignExecute(object sender, ExecutedRoutedEventArgs e)
+        {
+            var cmd = ((AppVM)DataContext).CurrentCmd;
+            var agentTarget = (Target)((DataGridCell)e.OriginalSource).DataContext;
+
+            MsgCommandSign check = new MsgCommandSign(cmd.CmdSN, DateTime.Now.ToString(),
+                ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString,
+                ConfigurationManager.ConnectionStrings["User"].ConnectionString)
+            {
+                IsAgentSign = true,
+                AgentTarget = agentTarget.Name
+            };
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    IO.SendMsg(check, "DSIM.Command.AgentSign");
+                });
+            }
+            catch (Exception except)
+            {
+                MessageBox.Show(except.Message);
+            }
+        }
+
+        /// <summary>
         /// 处理网络广播到本地的签收回执
         /// </summary>
         /// <param name="data"></param>
@@ -238,6 +357,15 @@ namespace CommandTransmission
         }
 
         /// <summary>
+        /// 广播列控命令等待校验
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void SendSpeedCmd(MsgSpeedCommand cmd)
+        {
+            SendCmd("DSIM.Command.Check", cmd);
+        }
+
+        /// <summary>
         /// 校验广播到本地的列控命令
         /// </summary>
         /// <param name="cmd"></param>
@@ -249,6 +377,24 @@ namespace CommandTransmission
                 NewSpeedWindow window = new NewSpeedWindow(eventAggregator, cmd, true);
                 window.Show();
             }
+        }
+
+        /// <summary>
+        /// 通过列控校验，并开始向网络广播
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void PassSpeedCmd(MsgSpeedCommand cmd)
+        {
+            int count = ((AppVM)DataContext).CachedCmds.Count +
+                ((AppVM)DataContext).SendingCmds.Count +
+                ((AppVM)DataContext).SendCmds.Count;
+
+            cmd.CmdSN = (count + 1).ToString();
+            cmd.Title = "列控指令";
+
+            SendCmd("DSIM.Command.SpeedCache", cmd);
+
+            MessageBox.Show("完成校验,已缓存");
         }
 
         /// <summary>
@@ -291,43 +437,6 @@ namespace CommandTransmission
                 ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
             }
         }
-
-        private void RegisterMQWrite()
-        {
-            eventAggregator.GetEvent<NotifyMain>().Unsubscribe(SendSpeedCmd);
-            eventAggregator.GetEvent<NotifyMain>().Subscribe(SendSpeedCmd, ThreadOption.UIThread);
-
-            eventAggregator.GetEvent<PassSpeedCommand>().Unsubscribe(PassSpeedCmd);
-            eventAggregator.GetEvent<PassSpeedCommand>().Subscribe(PassSpeedCmd, ThreadOption.UIThread);
-        }
-
-        /// <summary>
-        /// 广播列控命令等待校验
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void SendSpeedCmd(MsgSpeedCommand cmd)
-        {
-            SendCmd("DSIM.Command.Check", cmd);
-        }
-
-        /// <summary>
-        /// 通过列控校验，并开始向网络广播
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void PassSpeedCmd(MsgSpeedCommand cmd)
-        {
-            int count = ((AppVM)DataContext).CachedCmds.Count +
-                ((AppVM)DataContext).SendingCmds.Count +
-                ((AppVM)DataContext).SendCmds.Count;
-
-            cmd.CmdSN = (count + 1).ToString();
-            cmd.Title = "列控指令";
-
-            SendCmd("DSIM.Command.SpeedCache", cmd);
-
-            MessageBox.Show("完成校验,已缓存");
-        }
-
 
         #region 界面按钮事件
 
@@ -377,6 +486,23 @@ namespace CommandTransmission
         }
 
         /// <summary>
+        /// 打开命令模板窗口
+        /// </summary>
+        private void ShowCmdTemplateWindow()
+        {
+            if (Application.Current.Windows.OfType<CommandTemplateWindow>().Count() == 0)
+            {
+                CommandTemplateWindow window = new CommandTemplateWindow(eventAggregator);
+                window.Show();
+            }
+            else
+            {
+                var window = Application.Current.Windows.OfType<CommandTemplateWindow>().First();
+                window.WindowState = WindowState.Normal;
+            }
+        }
+
+        /// <summary>
         /// 尝试双击切换命令界面
         /// </summary>
         /// <param name="sender"></param>
@@ -414,88 +540,15 @@ namespace CommandTransmission
         }
 
         /// <summary>
-        /// 点击缓存按钮触发
+        /// 设置当前命令为指定值
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CacheExecute(object sender, ExecutedRoutedEventArgs e)
+        /// <param name="cmd"></param>
+        private void SetCurrentCmd(MsgDispatchCommand cmd)
         {
-            var cmd = ((AppVM)DataContext).CurrentCmd;
-            if (cmd.CmdState == CmdState.已缓存)
-            {
-                SendCmd("DSIM.Command.Update", ((AppVM)DataContext).CurrentCmd);
-            }
-            else
-            {
-                SendCmd("DSIM.Command.Create", ((AppVM)DataContext).CurrentCmd);
-            }
-        }
+            ((AppVM)DataContext).CurrentCmd = cmd;
 
-        /// <summary>
-        /// 点击申请批准按钮触发
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ApplyForExecute(object sender, ExecutedRoutedEventArgs e)
-        {
-            // 当前命令已被修改过
-            if (((AppVM)DataContext).CurrentCmd.IsRead2Update)
-            {
-                if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
-                        MessageBoxResult.Yes)
-                {
-                    CacheExecute(null, null);
-                }
-                else
-                {
-                    ((AppVM)DataContext).CurrentCmd.IsRead2Update = false;
-                }
-            }
-            else
-            {
-                SendCmd("DSIM.Command.Approve", ((AppVM)DataContext).CurrentCmd);
-            }
-        }
-
-        /// <summary>
-        /// 点击下达按钮触发
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SendCmdExecute(object sender, ExecutedRoutedEventArgs e)
-        {
-            SendCmd("DSIM.Command.Transmit", ((AppVM)DataContext).CurrentCmd);
-        }
-
-        /// <summary>
-        /// 代签下达的命令
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void AgentSignExecute(object sender, ExecutedRoutedEventArgs e)
-        {
-            var cmd = ((AppVM)DataContext).CurrentCmd;
-            var agentTarget = (Target)((DataGridCell)e.OriginalSource).DataContext;
-
-            MsgCommandSign check = new MsgCommandSign(cmd.CmdSN, DateTime.Now.ToString(),
-                ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString,
-                ConfigurationManager.ConnectionStrings["User"].ConnectionString)
-            {
-                IsAgentSign = true,
-                AgentTarget = agentTarget.Name
-            };
-
-            try
-            {
-                await Task.Run(() =>
-                {
-                    IO.SendMsg(check, "DSIM.Command.AgentSign");
-                });
-            }
-            catch (Exception except)
-            {
-                MessageBox.Show(except.Message);
-            }
+            CmdParagraph.Inlines.Clear();
+            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
         }
 
         /// <summary>
@@ -576,67 +629,6 @@ namespace CommandTransmission
             {
                 MessageBox.Show(except.Message);
             }
-        }
-
-        /// <summary>
-        /// 将当前命令的内容部分全部转为字符串（暂时没有找到流文档的序列化方式）
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <returns></returns>
-        private string FillCmdContent()
-        {
-            string s = "";
-
-            foreach (var item in CmdParagraph.Inlines)
-            {
-                if (item is Run)
-                {
-                    s += ((Run)item).Text;
-                }
-                else
-                {
-                    foreach (Run fill in ((Hyperlink)item).Inlines)
-                    {
-                        s += fill.Text;
-                    }
-                }
-            }
-
-            return s;
-        }
-
-        /// <summary>
-        /// 打开命令模板窗口
-        /// </summary>
-        private void ShowCmdTemplateWindow()
-        {
-            if (Application.Current.Windows.OfType<CommandTemplateWindow>().Count() == 0)
-            {
-                CommandTemplateWindow window = new CommandTemplateWindow(eventAggregator);
-                window.Show();
-            }
-            else
-            {
-                var window = Application.Current.Windows.OfType<CommandTemplateWindow>().First();
-                window.WindowState = WindowState.Normal;
-            }
-        }
-
-        /// <summary>
-        /// 设置当前命令为指定值
-        /// </summary>
-        /// <param name="cmd"></param>
-        private void SetCurrentCmd(MsgDispatchCommand cmd)
-        {
-            ((AppVM)DataContext).CurrentCmd = cmd;
-
-            CmdParagraph.Inlines.Clear();
-            CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
-        }
-
-        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Process.GetCurrentProcess().Kill();
         }
 
     }

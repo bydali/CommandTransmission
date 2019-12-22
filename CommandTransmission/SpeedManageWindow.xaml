@@ -1,29 +1,32 @@
 ﻿<Controls:MetroWindow x:Class="CommandTransmission.SpeedManageWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CommandTransmission"
-        mc:Ignorable="d"
-        Title="限速管理" Width="800"
-		xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls">
+					  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+					  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+					  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+					  xmlns:local="clr-namespace:CommandTransmission"
+					  mc:Ignorable="d"
+					  Title="限速管理"
+					  Width="800"
+					  Height="500"
+					  GlowBrush="{DynamicResource AccentColorBrush}"
+					  xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls">
 	<Controls:MetroWindow.Resources>
-		<local:ActivatedSpeedCmds x:Key="activated"/>
-		<local:SettedSpeedCmds x:Key="setted"/>
-		<local:SketchSpeedCmds x:Key="sketch"/>
+		<local:ActivatedSpeedCmds x:Key="activated" />
+		<local:SettedSpeedCmds x:Key="setted" />
+		<local:SketchSpeedCmds x:Key="sketch" />
 	</Controls:MetroWindow.Resources>
-	<Grid>
+	<Grid Margin="10">
 		<Grid.RowDefinitions>
-			<RowDefinition/>
-			<RowDefinition Height="150"/>
+			<RowDefinition />
+			<RowDefinition Height="150" />
 		</Grid.RowDefinitions>
 		<TabControl Name="Tab">
-			<TabItem Header="全部命令" Controls:ControlsHelper.HeaderFontSize="15">
+			<TabItem Header="全部命令"
+					 Controls:ControlsHelper.HeaderFontSize="15">
 				<DataGrid GridLinesVisibility="All"
 						  CanUserAddRows="False"
 						  AutoGenerateColumns="False"
-						  ItemsSource="{Binding SpeedCmds}"
-						  >
+						  ItemsSource="{Binding SpeedCmds}">
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="调度命令"
 											Binding="{Binding CmdSN}"
@@ -177,13 +180,13 @@
 		</TabControl>
 		<Grid Grid.Row="1">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition/>
-				<ColumnDefinition Width="100"/>
-				<ColumnDefinition/>
+				<ColumnDefinition />
+				<ColumnDefinition Width="100" />
+				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
 			<StackPanel Grid.Column="1">
 				<Button Content="刷新"
-						Margin="0,0,0,10"/>
+						Margin="0,0,0,10" />
 				<Button Content="激活校验"
 						Click="ActivateCmd"
 						Margin="0,0,0,10" />
@@ -197,8 +200,10 @@
 			</StackPanel>
 			<DataGrid Grid.Column="2">
 				<DataGrid.Columns>
-					<DataGridTextColumn Width="0.2*" Header="级别"/>
-					<DataGridTextColumn Width="0.2*" Header="命令号"/>
+					<DataGridTextColumn Width="0.2*"
+										Header="级别" />
+					<DataGridTextColumn Width="0.2*"
+										Header="命令号" />
 					<DataGridTextColumn Header="描述"
 										Width="0.2*" />
 					<DataGridTextColumn Header="有效时间"

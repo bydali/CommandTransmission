@@ -15,7 +15,7 @@
 			<Label Content="{Binding Title}"/>
 		</HierarchicalDataTemplate>
 	</Window.Resources>
-	<Grid>
+	<Grid Margin="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
 			<RowDefinition/>

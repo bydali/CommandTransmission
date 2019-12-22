@@ -8,6 +8,7 @@
 					  prism:ViewModelLocator.AutoWireViewModel="True"
 					  Closing="MetroWindow_Closing"
 					  Title="{Binding AppTitle}"
+					  GlowBrush="{DynamicResource AccentColorBrush}"
 					  Name="TopWindow">
 	<Controls:MetroWindow.Resources>
 		<local:CmdListVisible x:Key="cmdListVisible" />
@@ -610,6 +611,7 @@
 								   Grid.Column="4" />
 							<CheckBox Content="需值班主任授权"
 									  IsChecked="{Binding NeedAuthorization,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									  IsEnabled="False"
 									  Name="DutyOfficerCheck"
 									  Margin="5,0,0,0"
 									  Grid.Row="4"
@@ -661,9 +663,11 @@
 									 Grid.Column="5"
 									 Grid.Row="2" />
 							<CheckBox IsChecked="{Binding IsAuthorized,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+									  IsEnabled="False"
 									  Grid.Column="5"
 									  Grid.Row="3" />
 							<ComboBox Grid.Column="5"
+									  IsEnabled="False"
 									  Grid.Row="1"
 									  SelectedIndex="{Binding CmdState,Converter={StaticResource cmdState},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
 								<ComboBoxItem Content="未缓存" />

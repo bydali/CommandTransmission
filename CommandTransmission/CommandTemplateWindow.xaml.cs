@@ -40,19 +40,6 @@ namespace CommandTransmission
         /// </summary>
         private void GenerateTemplate()
         {
-            ObservableCollection<Target> allTargets = new ObservableCollection<Target>();
-            using (XmlReader reader = XmlReader.Create("AllTargets.xml"))
-            {
-                while (!reader.EOF)
-                {
-                    if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "target")
-                    {
-                        allTargets.Add(new Target() { Name = reader.GetAttribute("name") });
-                    }
-                    reader.Read();
-                }
-            }
-
             CmdTmp = new ObservableCollection<CmdTemplate>();
             using (XmlReader reader = XmlReader.Create("CmdTemplate.xml"))
             {
@@ -64,6 +51,19 @@ namespace CommandTransmission
                     }
                     else if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
+                        ObservableCollection<Target> allTargets = new ObservableCollection<Target>();
+                        using (XmlReader reader1 = XmlReader.Create("AllTargets.xml"))
+                        {
+                            while (!reader1.EOF)
+                            {
+                                if (reader1.MoveToContent() == XmlNodeType.Element && reader1.Name == "target")
+                                {
+                                    allTargets.Add(new Target() { Name = reader1.GetAttribute("name") });
+                                }
+                                reader1.Read();
+                            }
+                        }
+
                         CmdTmp.Last().CmdList.Add(new MsgDispatchCommand(
                             reader.GetAttribute("title"),
                             reader.GetAttribute("content"),
