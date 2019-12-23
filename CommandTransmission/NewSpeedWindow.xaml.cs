@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using DSIM.Communications;
+using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Prism.Events;
@@ -18,7 +19,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
-using YDMSG;
 
 namespace CommandTransmission
 {
@@ -125,21 +125,71 @@ namespace CommandTransmission
 
         private bool CheckEquality(MsgSpeedCommand local, MsgSpeedCommand net)
         {
-            var localJ = JsonConvert.SerializeObject(local);
-            var netJ = JsonConvert.SerializeObject(net);
-
-            JObject localO = JObject.Parse(localJ);
-            JObject netO = JObject.Parse(netJ);
-
-            localO.Remove("User");
-            netO.Remove("User");
-
-            if (JsonConvert.SerializeObject(localO).
-                Equals(JsonConvert.SerializeObject(netO)))
+            if (local.EndTime != net.EndTime)
             {
-                return true;
+                return false;
             }
-            return false;
+            if (local.BeginTime != net.BeginTime)
+            {
+                return false;
+            }
+            if (local.IsCancel != net.IsCancel)
+            {
+                return false;
+            }
+            if (local.LimitValue != net.LimitValue)
+            {
+                return false;
+            }
+            if (local.EndKMark4 != net.EndKMark4)
+            {
+                return false;
+            }
+            if (local.EndKMark3 != net.EndKMark3)
+            {
+                return false;
+            }
+            if (local.EndKMark2 != net.EndKMark2)
+            {
+                return false;
+            }
+            if (local.EndKMark1 != net.EndKMark1)
+            {
+                return false;
+            }
+            if (local.BeginKMark4 != net.BeginKMark4)
+            {
+                return false;
+            }
+            if (local.BeginKMark3 != net.BeginKMark3)
+            {
+                return false;
+            }
+            if (local.BeginKMark2 != net.BeginKMark2)
+            {
+                return false;
+            }
+            if (local.BeginKMark1 != net.BeginKMark1)
+            {
+                return false;
+            }
+            if (local.RouteName != net.RouteName)
+            {
+                return false;
+            }
+            if (local.CmdType != net.CmdType)
+            {
+                return false;
+            }
+            if (local.Reason != net.Reason)
+            {
+                return false;
+            }
+            if (local.EndLasting != net.EndLasting)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

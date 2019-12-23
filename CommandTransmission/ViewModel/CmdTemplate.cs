@@ -11,12 +11,12 @@ namespace CommandTransmission
     class CmdTemplate
     {
         public string Type { get; set; }
-        public ObservableCollection<YDMSG.MsgDispatchCommand> CmdList { get; set; }
+        public ObservableCollection<MsgDispatchCommand> CmdList { get; set; }
 
         internal CmdTemplate(string Type)
         {
             this.Type = Type;
-            CmdList = new ObservableCollection<YDMSG.MsgDispatchCommand>();
+            CmdList = new ObservableCollection<MsgDispatchCommand>();
         }
     }
 }

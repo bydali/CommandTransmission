@@ -14,7 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using YDMSG;
 using DSIM.Communications;
 
 namespace CommandTransmission
@@ -51,10 +50,10 @@ namespace CommandTransmission
                 var cmd = SketchDG.SelectedItem;
                 if (cmd != null)
                 {
-                    if (((YDMSG.MsgSpeedCommand)cmd).CmdState == YDMSG.CmdState.已签收)
+                    if (((MsgSpeedCommand)cmd).CmdState == CmdState.已签收)
                     {
-                        ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandActive;
-                        ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Active");
+                        ((MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandActive;
+                        ActivateSpeedCmd((MsgSpeedCommand)cmd, "DSIM.Command.Active");
                     }
                     else
                     {
@@ -72,10 +71,10 @@ namespace CommandTransmission
                 var cmd = ActivatedDG.SelectedItem;
                 if (cmd != null)
                 {
-                    if (((YDMSG.MsgSpeedCommand)cmd).CmdState == YDMSG.CmdState.已签收)
+                    if (((MsgSpeedCommand)cmd).CmdState == CmdState.已签收)
                     {
-                        ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandExecute;
-                        ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Execute");
+                        ((MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandExecute;
+                        ActivateSpeedCmd((MsgSpeedCommand)cmd, "DSIM.Command.Execute");
                     }
                     else
                     {
@@ -85,7 +84,7 @@ namespace CommandTransmission
             }
         }
 
-        private async void ActivateSpeedCmd(YDMSG.MsgSpeedCommand cmd, string topic)
+        private async void ActivateSpeedCmd(MsgSpeedCommand cmd, string topic)
         {
             await Task.Run(() =>
             {

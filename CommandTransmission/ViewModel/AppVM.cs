@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using DSIM.Communications;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
@@ -13,7 +14,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml;
-using YDMSG;
 
 namespace CommandTransmission
 {
