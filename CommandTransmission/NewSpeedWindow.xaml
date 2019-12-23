@@ -13,7 +13,7 @@
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition />
-			<RowDefinition Height="auto"/>
+			<RowDefinition Height="auto" />
 		</Grid.RowDefinitions>
 		<Grid>
 			<Grid.ColumnDefinitions>
@@ -42,6 +42,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>施工</sys:String>
 										<sys:String>风雨雪</sys:String>
 										<sys:String>突发灾难</sys:String>
@@ -59,6 +60,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>正线限速</sys:String>
 										<sys:String>侧线限速</sys:String>
 									</x:Array>
@@ -81,6 +83,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>武广下行线</sys:String>
 										<sys:String>武广上行线</sys:String>
 									</x:Array>
@@ -100,6 +103,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>A</sys:String>
 										<sys:String>B</sys:String>
 										<sys:String>C</sys:String>
@@ -166,6 +170,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>a</sys:String>
 										<sys:String>b</sys:String>
 										<sys:String>c</sys:String>
@@ -210,6 +215,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>A</sys:String>
 										<sys:String>B</sys:String>
 										<sys:String>C</sys:String>
@@ -276,6 +282,7 @@
 									<x:Array Type="sys:String"
 											 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 											 xmlns:sys="clr-namespace:System;assembly=mscorlib">
+										<x:Static Member="sys:String.Empty" />
 										<sys:String>a</sys:String>
 										<sys:String>b</sys:String>
 										<sys:String>c</sys:String>
@@ -375,6 +382,6 @@
 				 IsReadOnly="True"
 				 VerticalScrollBarVisibility="Auto"
 				 Margin="10,0,10,10"
-				 Text=""/>
+				 Text="" />
 	</Grid>
 </Controls:MetroWindow>

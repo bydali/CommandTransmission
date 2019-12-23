@@ -49,10 +49,18 @@ namespace CommandTransmission
             if (((TabItem)Tab.SelectedItem).Header.ToString() == "已拟定")
             {
                 var cmd = SketchDG.SelectedItem;
-                if (cmd!=null)
+                if (cmd != null)
                 {
-                    ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandActive;
-                    ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Active");
+                    if (((YDMSG.MsgSpeedCommand)cmd).CmdState == YDMSG.CmdState.已签收)
+                    {
+                        ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandActive;
+                        ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Active");
+                    }
+                    else
+                    {
+                        MessageBox.Show("命令未被签收");
+                    }
+
                 }
             }
         }
@@ -64,15 +72,23 @@ namespace CommandTransmission
                 var cmd = ActivatedDG.SelectedItem;
                 if (cmd != null)
                 {
-                    ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandExecute;
-                    ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Execute");
+                    if (((YDMSG.MsgSpeedCommand)cmd).CmdState == YDMSG.CmdState.已签收)
+                    {
+                        ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandExecute;
+                        ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Execute");
+                    }
+                    else
+                    {
+                        MessageBox.Show("命令未被签收");
+                    }
                 }
             }
         }
 
-        private async void ActivateSpeedCmd(YDMSG.MsgSpeedCommand cmd,string topic)
+        private async void ActivateSpeedCmd(YDMSG.MsgSpeedCommand cmd, string topic)
         {
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 IO.SendMsg(cmd, topic);
             });
         }

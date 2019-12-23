@@ -373,6 +373,15 @@ namespace CommandTransmission
             }
 
             ((AppVM)DataContext).ReceivedCmds.Insert(0, data);
+
+            var speed = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == data.CmdSN);
+            if (speed.Count()!=0)
+            {
+                if (cmd.CmdState == YDMSG.CmdState.已签收)
+                {
+                    speed.First().CmdState = YDMSG.CmdState.已签收;
+                }
+            }
         }
 
         /// <summary>
