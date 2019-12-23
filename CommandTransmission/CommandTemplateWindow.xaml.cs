@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DSIM.Communications;
+using Newtonsoft.Json;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
-using YDMSG;
 
 namespace CommandTransmission
 {
@@ -51,20 +51,20 @@ namespace CommandTransmission
                     }
                     else if (reader.MoveToContent() == XmlNodeType.Element && reader.Name == "cmd")
                     {
-                        ObservableCollection<Target> allTargets = new ObservableCollection<Target>();
+                        ObservableCollection<YDMSG.Target> allTargets = new ObservableCollection<YDMSG.Target>();
                         using (XmlReader reader1 = XmlReader.Create("AllTargets.xml"))
                         {
                             while (!reader1.EOF)
                             {
                                 if (reader1.MoveToContent() == XmlNodeType.Element && reader1.Name == "target")
                                 {
-                                    allTargets.Add(new Target() { Name = reader1.GetAttribute("name") });
+                                    allTargets.Add(new YDMSG.Target() { Name = reader1.GetAttribute("name") });
                                 }
                                 reader1.Read();
                             }
                         }
 
-                        CmdTmp.Last().CmdList.Add(new MsgDispatchCommand(
+                        CmdTmp.Last().CmdList.Add(new YDMSG.MsgDispatchCommand(
                             reader.GetAttribute("title"),
                             reader.GetAttribute("content"),
                             reader.GetAttribute("need_authorization").Equals("1"),
@@ -84,10 +84,10 @@ namespace CommandTransmission
         /// <param name="e"></param>
         private void TreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (((TreeView)sender).SelectedValue is MsgDispatchCommand)
+            if (((TreeView)sender).SelectedValue is YDMSG.MsgDispatchCommand)
             {
-                var cmd = (MsgDispatchCommand)((TreeView)sender).SelectedValue;
-                var cmd_copy = IO.CopySomething<MsgDispatchCommand>(cmd);
+                var cmd = (YDMSG.MsgDispatchCommand)((TreeView)sender).SelectedValue;
+                var cmd_copy = IO.CopySomething<YDMSG.MsgDispatchCommand>(cmd);
                 eventAggregator.GetEvent<EditNewCommand>().
                     Publish(cmd_copy);
             }

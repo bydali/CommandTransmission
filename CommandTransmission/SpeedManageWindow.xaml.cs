@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using YDMSG;
+using DSIM.Communications;
 
 namespace CommandTransmission
 {
@@ -50,7 +51,8 @@ namespace CommandTransmission
                 var cmd = SketchDG.SelectedItem;
                 if (cmd!=null)
                 {
-                    ActivateSpeedCmd((MsgSpeedCommand)cmd, "DSIM.Command.Active");
+                    ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandActive;
+                    ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Active");
                 }
             }
         }
@@ -62,12 +64,13 @@ namespace CommandTransmission
                 var cmd = ActivatedDG.SelectedItem;
                 if (cmd != null)
                 {
-                    ActivateSpeedCmd((MsgSpeedCommand)cmd, "DSIM.Command.Execute");
+                    ((YDMSG.MsgSpeedCommand)cmd).Category = MsgCategoryEnum.CommandExecute;
+                    ActivateSpeedCmd((YDMSG.MsgSpeedCommand)cmd, "DSIM.Command.Execute");
                 }
             }
         }
 
-        private async void ActivateSpeedCmd(MsgSpeedCommand cmd,string topic)
+        private async void ActivateSpeedCmd(YDMSG.MsgSpeedCommand cmd,string topic)
         {
             await Task.Run(() => {
                 IO.SendMsg(cmd, topic);

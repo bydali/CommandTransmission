@@ -23,6 +23,7 @@ using Microsoft.Practices.Unity;
 using Newtonsoft.Json;
 using Prism.Events;
 using YDMSG;
+using DSIM.Communications;
 
 namespace CommandTransmission
 {
@@ -95,7 +96,7 @@ namespace CommandTransmission
         /// 从模板窗口传递一个命令副本到主窗口编辑界面
         /// </summary>
         /// <param name="data"></param>
-        private void NewEdittingCmd(MsgDispatchCommand data)
+        private void NewEdittingCmd(YDMSG.MsgDispatchCommand data)
         {
             int count = ((AppVM)DataContext).CachedCmds.Count +
                 ((AppVM)DataContext).SendingCmds.Count +
@@ -200,6 +201,7 @@ namespace CommandTransmission
         private void CacheExecute(object sender, ExecutedRoutedEventArgs e)
         {
             var cmd = ((AppVM)DataContext).CurrentCmd;
+            ((AppVM)DataContext).CurrentCmd.Category = MsgCategoryEnum.CommandUpdate;
             SendCmd("DSIM.Command.Update", ((AppVM)DataContext).CurrentCmd);
         }
 
@@ -207,7 +209,7 @@ namespace CommandTransmission
         /// 处理网络广播到本地的缓存命令
         /// </summary>
         /// <param name="cmd"></param>
-        private void UpdateCacheCmd(MsgDispatchCommand cmd)
+        private void UpdateCacheCmd(YDMSG.MsgDispatchCommand cmd)
         {
             var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
             if (result.Count() != 0)
@@ -224,7 +226,7 @@ namespace CommandTransmission
             CmdParagraph.Inlines.Clear();
             CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
 
-            cmd.CmdState = CmdState.已缓存;
+            cmd.CmdState = YDMSG.CmdState.已缓存;
         }
 
         /// <summary>
@@ -249,6 +251,8 @@ namespace CommandTransmission
             }
             else
             {
+                ((AppVM)DataContext).CurrentCmd.IsApproving = true;
+                ((AppVM)DataContext).CurrentCmd.Category = MsgCategoryEnum.CommandApprove;
                 SendCmd("DSIM.Command.Approve", ((AppVM)DataContext).CurrentCmd);
             }
         }
@@ -257,7 +261,7 @@ namespace CommandTransmission
         /// 处理网络广播到本地的申请消息
         /// </summary>
         /// <param name="cmd"></param>
-        private void ApproveCmd(MsgDispatchCommand cmd)
+        private void ApproveCmd(YDMSG.MsgDispatchCommand cmd)
         {
             var user = ConfigurationManager.ConnectionStrings["User"].ConnectionString;
             var result = cmd.Targets.Where(i => i.Name == user);
@@ -286,6 +290,7 @@ namespace CommandTransmission
         /// <param name="e"></param>
         private void SendCmdExecute(object sender, ExecutedRoutedEventArgs e)
         {
+            ((AppVM)DataContext).CurrentCmd.Category = MsgCategoryEnum.CommandTransmit;
             SendCmd("DSIM.Command.Transmit", ((AppVM)DataContext).CurrentCmd);
         }
 
@@ -293,7 +298,7 @@ namespace CommandTransmission
         /// 处理网络广播到本地的下达命令
         /// </summary>
         /// <param name="cmd"></param>
-        private void TransmitCmd(MsgDispatchCommand cmd)
+        private void TransmitCmd(YDMSG.MsgDispatchCommand cmd)
         {
             var result = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN);
             ((AppVM)DataContext).CachedCmds.Remove(result.First());
@@ -304,7 +309,7 @@ namespace CommandTransmission
             CmdParagraph.Inlines.Clear();
             CmdParagraph.Inlines.Add(new Run(cmd.Content.ToString()));
 
-            cmd.CmdState = CmdState.已下达;
+            cmd.CmdState = YDMSG.CmdState.已下达;
         }
 
         /// <summary>
@@ -315,26 +320,40 @@ namespace CommandTransmission
         private async void AgentSignExecute(object sender, ExecutedRoutedEventArgs e)
         {
             var cmd = ((AppVM)DataContext).CurrentCmd;
-            var agentTarget = (Target)((DataGridCell)e.OriginalSource).DataContext;
-
-            MsgCommandSign check = new MsgCommandSign(cmd.CmdSN, DateTime.Now.ToString(),
-                ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString,
-                ConfigurationManager.ConnectionStrings["User"].ConnectionString)
+            if (cmd.IsApproving)
             {
-                IsAgentSign = true,
-                AgentTarget = agentTarget.Name
-            };
+                var oldCmd = ((AppVM)DataContext).CachedCmds.Where(i => i.CmdSN == cmd.CmdSN).First();
+                ((AppVM)DataContext).CachedCmds.Remove(oldCmd);
+                ((AppVM)DataContext).CachedCmds.Insert(0, cmd);
+                ((AppVM)DataContext).CurrentCmd = cmd;
 
-            try
-            {
-                await Task.Run(() =>
-                {
-                    IO.SendMsg(check, "DSIM.Command.AgentSign");
-                });
+                cmd.Approve(true);
+                CacheExecute(null, null);
             }
-            catch (Exception except)
+            else
             {
-                MessageBox.Show(except.Message);
+                var agentTarget = (YDMSG.Target)((DataGridCell)e.OriginalSource).DataContext;
+
+                YDMSG.MsgCommandSign check = new YDMSG.MsgCommandSign(cmd.CmdSN, DateTime.Now.ToString(),
+                    ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString,
+                    ConfigurationManager.ConnectionStrings["User"].ConnectionString)
+                {
+                    IsAgentSign = true,
+                    AgentTarget = agentTarget.Name
+                };
+
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        check.Category = MsgCategoryEnum.CommandAgentSign;
+                        IO.SendMsg(check, "DSIM.Command.AgentSign");
+                    });
+                }
+                catch (Exception except)
+                {
+                    MessageBox.Show(except.Message);
+                }
             }
         }
 
@@ -342,12 +361,12 @@ namespace CommandTransmission
         /// 处理网络广播到本地的签收回执
         /// </summary>
         /// <param name="data"></param>
-        private void TargetSignCmd(MsgCommandSign data)
+        private void TargetSignCmd(YDMSG.MsgCommandSign data)
         {
             var cmd = ((AppVM)DataContext).SendingCmds.Where(i => i.CmdSN == data.CmdSN).First();
             cmd.OneTargetSigned(data);
 
-            if (cmd.CmdState == CmdState.已签收)
+            if (cmd.CmdState == YDMSG.CmdState.已签收)
             {
                 ((AppVM)DataContext).SendingCmds.Remove(cmd);
                 ((AppVM)DataContext).SendCmds.Insert(0, cmd);
@@ -360,8 +379,9 @@ namespace CommandTransmission
         /// 广播列控命令等待校验
         /// </summary>
         /// <param name="cmd"></param>
-        private void SendSpeedCmd(MsgSpeedCommand cmd)
+        private void SendSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
+            cmd.Category = MsgCategoryEnum.CommandCheck;
             SendCmd("DSIM.Command.Check", cmd);
         }
 
@@ -369,7 +389,7 @@ namespace CommandTransmission
         /// 校验广播到本地的列控命令
         /// </summary>
         /// <param name="cmd"></param>
-        private void CheckSpeedCmd(MsgSpeedCommand cmd)
+        private void CheckSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
             // 非此命令编辑用户才能校验
             if (cmd.User != ConfigurationManager.ConnectionStrings["User"].ConnectionString)
@@ -383,7 +403,7 @@ namespace CommandTransmission
         /// 通过列控校验，并开始向网络广播
         /// </summary>
         /// <param name="cmd"></param>
-        private void PassSpeedCmd(MsgSpeedCommand cmd)
+        private void PassSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
             int count = ((AppVM)DataContext).CachedCmds.Count +
                 ((AppVM)DataContext).SendingCmds.Count +
@@ -392,6 +412,7 @@ namespace CommandTransmission
             cmd.CmdSN = (count + 1).ToString();
             cmd.Title = "列控指令";
 
+            cmd.Category = MsgCategoryEnum.SpeedCache;
             SendCmd("DSIM.Command.SpeedCache", cmd);
 
             MessageBox.Show("完成校验,已缓存");
@@ -401,11 +422,11 @@ namespace CommandTransmission
         /// 收到广播到本地的列控命令，加入缓存
         /// </summary>
         /// <param name="cmd"></param>
-        private void CacheSpeedCmd(MsgSpeedCommand cmd)
+        private void CacheSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
             UpdateCacheCmd(cmd);
 
-            cmd.SpeedCmdState = SpeedCmdState.已拟定;
+            cmd.SpeedCmdState = YDMSG.SpeedCmdState.已拟定;
             ((AppVM)DataContext).SpeedCmds.Add(cmd);
             ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
         }
@@ -414,12 +435,12 @@ namespace CommandTransmission
         /// 收到广播到本地的列控命令，置状态为已激活
         /// </summary>
         /// <param name="cmd"></param>
-        private void ActiveSpeedCmd(MsgSpeedCommand cmd)
+        private void ActiveSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
             var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
             if (result.Count() != 0)
             {
-                result.First().SpeedCmdState = SpeedCmdState.已激活;
+                result.First().SpeedCmdState = YDMSG.SpeedCmdState.已激活;
                 ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
             }
         }
@@ -428,12 +449,12 @@ namespace CommandTransmission
         /// 收到广播到本地的列控命令，置状态为已设置
         /// </summary>
         /// <param name="cmd"></param>
-        private void ExecuteSpeedCmd(MsgSpeedCommand cmd)
+        private void ExecuteSpeedCmd(YDMSG.MsgSpeedCommand cmd)
         {
             var result = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == cmd.CmdSN);
             if (result.Count() != 0)
             {
-                result.First().SpeedCmdState = SpeedCmdState.已设置;
+                result.First().SpeedCmdState = YDMSG.SpeedCmdState.已设置;
                 ((AppVM)DataContext).SpeedCmds = ((AppVM)DataContext).SpeedCmds;
             }
         }
@@ -449,14 +470,14 @@ namespace CommandTransmission
             if (appVM.CurrentCmd != null)
             {
                 // 当前命令为除缓存外的其他状态，直接打开模板窗口
-                if (appVM.CurrentCmd.CmdState != CmdState.已缓存)
+                if (appVM.CurrentCmd.CmdState != YDMSG.CmdState.已缓存)
                 {
                     ShowCmdTemplateWindow();
                 }
                 else
                 {
                     // 缓存了没有新的修改，直接打开模板窗口
-                    if ((appVM.CurrentCmd.CmdState == CmdState.已缓存 &&
+                    if ((appVM.CurrentCmd.CmdState == YDMSG.CmdState.已缓存 &&
                         !appVM.CurrentCmd.IsRead2Update))
                     {
                         ShowCmdTemplateWindow();
@@ -509,17 +530,17 @@ namespace CommandTransmission
         /// <param name="e"></param>
         private void TryChangeCurrentCmd(object sender, MouseButtonEventArgs e)
         {
-            var cmd = (MsgDispatchCommand)((DataGridRow)sender).DataContext;
+            var cmd = (YDMSG.MsgDispatchCommand)((DataGridRow)sender).DataContext;
 
             // 若不是缓存状态，则直接切换
-            if (cmd.CmdState != CmdState.已缓存)
+            if (cmd.CmdState != YDMSG.CmdState.已缓存)
             {
                 SetCurrentCmd(cmd);
             }
             else
             {
                 // 为缓存状态且已被修改
-                if (((AppVM)DataContext).CurrentCmd.CmdState == CmdState.已缓存 &&
+                if (((AppVM)DataContext).CurrentCmd.CmdState == YDMSG.CmdState.已缓存 &&
                 ((AppVM)DataContext).CurrentCmd.IsRead2Update)
                 {
                     if (MessageBox.Show("当前命令已被修改，是否缓存", "操作提示", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
@@ -543,7 +564,7 @@ namespace CommandTransmission
         /// 设置当前命令为指定值
         /// </summary>
         /// <param name="cmd"></param>
-        private void SetCurrentCmd(MsgDispatchCommand cmd)
+        private void SetCurrentCmd(YDMSG.MsgDispatchCommand cmd)
         {
             ((AppVM)DataContext).CurrentCmd = cmd;
 
@@ -560,7 +581,7 @@ namespace CommandTransmission
         {
             if (allStationDg.ItemsSource != null)
             {
-                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
+                foreach (var item in (ObservableCollection<YDMSG.Target>)allStationDg.ItemsSource)
                 {
                     item.IsSelected = true;
                 }
@@ -576,7 +597,7 @@ namespace CommandTransmission
         {
             if (allStationDg.ItemsSource != null)
             {
-                foreach (var item in (ObservableCollection<Target>)allStationDg.ItemsSource)
+                foreach (var item in (ObservableCollection<YDMSG.Target>)allStationDg.ItemsSource)
                 {
                     item.IsSelected = false;
                 }
@@ -613,9 +634,9 @@ namespace CommandTransmission
         /// <param name="topic"></param>
         private async void SendCmd(string topic, object cmd)
         {
-            if (!(cmd is MsgSpeedCommand))
+            if (!(cmd is YDMSG.MsgSpeedCommand))
             {
-                ((MsgDispatchCommand)cmd).Content = FillCmdContent();
+                ((YDMSG.MsgDispatchCommand)cmd).Content = FillCmdContent();
             }
 
             try

@@ -171,6 +171,12 @@ namespace CommandTransmission
                 {
                     e.CanExecute = true;
                 }
+                else if ((CurrentCmd.CmdState == CmdState.已缓存) &&
+                    (CurrentCmd.Targets.Where(i => i.IsSelected == true).
+                    Where(i => i.Name == "值班主任").Count() != 0))
+                {
+                    e.CanExecute = true;
+                }
                 else
                 {
                     e.CanExecute = false;
@@ -201,6 +207,18 @@ namespace CommandTransmission
                         {
                             e.CanExecute = false;
                         }
+                        else if (CurrentCmd.Targets.
+                            Where(i => i.IsSelected).
+                            Where(i => i.Name == "值班主任").Count() != 0 &&
+                            !(CurrentCmd.Targets.
+                            Where(i => i.IsSelected).
+                            Where(i => i.Name == "值班主任").First().IsSigned == true ||
+                            CurrentCmd.Targets.
+                            Where(i => i.IsSelected).
+                            Where(i => i.Name == "值班主任").First().IsAgentSigned == true))
+                        {
+                            e.CanExecute = false;
+                        }
                         else
                         {
                             e.CanExecute = true;
@@ -223,6 +241,11 @@ namespace CommandTransmission
             if (CurrentCmd != null)
             {
                 if (CurrentCmd.CmdState == CmdState.已下达)
+                {
+                    e.CanExecute = true;
+                }
+                else if (CurrentCmd.CmdState == CmdState.已缓存 &&
+                    CurrentCmd.IsApproving == true)
                 {
                     e.CanExecute = true;
                 }

@@ -23,6 +23,22 @@ namespace CommandTransmission
         {
             eventAggregator = aggregator;
 
+            //MQHelper.ConnectionString = ConfigurationManager.ConnectionStrings["RabbitMQ"].ConnectionString;
+            //_mqHelper = new MQHelper();
+            //_mqHelper.ClientSubscriptionId = ConfigurationManager.ConnectionStrings["ClientName"].ConnectionString + "-" +
+            //    ConfigurationManager.ConnectionStrings["User"].ConnectionString;
+            //_mqHelper.MessageArrived += RabbitMQ_MessageArrived;
+            //_mqHelper.Topics.Add("DSIM.Command.Update");
+            //_mqHelper.Topics.Add("DSIM.Command.Approve");
+            //_mqHelper.Topics.Add("DSIM.Command.Transmit");
+            //_mqHelper.Topics.Add("DSIM.Command.Sign");
+            //_mqHelper.Topics.Add("DSIM.Command.AgentSign");
+            //_mqHelper.Topics.Add("DSIM.Command.Check");
+            //_mqHelper.Topics.Add("DSIM.Command.SpeedCache");
+            //_mqHelper.Topics.Add("DSIM.Command.Active");
+            //_mqHelper.Topics.Add("DSIM.Command.Execute");
+            //_mqHelper.Subcribe();
+
             // 以下为测试代码
             try
             {
@@ -68,15 +84,15 @@ namespace CommandTransmission
                                     switch (suffix)
                                     {
                                         case ("DSIM.Command.Update"):
-                                            var data1 = JsonConvert.DeserializeObject<MsgDispatchCommand>(content);
+                                            var data1 = JsonConvert.DeserializeObject<YDMSG.MsgDispatchCommand>(content);
                                             eventAggregator.GetEvent<CacheCommand>().Publish(data1);
                                             break;
                                         case ("DSIM.Command.Approve"):
-                                            var data2 = JsonConvert.DeserializeObject<MsgDispatchCommand>(content);
+                                            var data2 = JsonConvert.DeserializeObject<YDMSG.MsgDispatchCommand>(content);
                                             eventAggregator.GetEvent<ApproveCommand>().Publish(data2);
                                             break;
                                         case ("DSIM.Command.Transmit"):
-                                            var data3 = JsonConvert.DeserializeObject<MsgDispatchCommand>(content);
+                                            var data3 = JsonConvert.DeserializeObject<YDMSG.MsgDispatchCommand>(content);
                                             eventAggregator.GetEvent<TransmitCommand>().Publish(data3);
                                             break;
                                         case ("DSIM.Command.Sign"):
@@ -88,19 +104,19 @@ namespace CommandTransmission
                                             eventAggregator.GetEvent<AgentSignCommand>().Publish(data5);
                                             break;
                                         case ("DSIM.Command.Check"):
-                                            var data6 = JsonConvert.DeserializeObject<MsgSpeedCommand>(content);
+                                            var data6 = JsonConvert.DeserializeObject<YDMSG.MsgSpeedCommand>(content);
                                             eventAggregator.GetEvent<CheckSpeedCommand>().Publish(data6);
                                             break;
                                         case ("DSIM.Command.SpeedCache"):
-                                            var data7 = JsonConvert.DeserializeObject<MsgSpeedCommand>(content);
+                                            var data7 = JsonConvert.DeserializeObject<YDMSG.MsgSpeedCommand>(content);
                                             eventAggregator.GetEvent<CacheSpeedCommand>().Publish(data7);
                                             break;
                                         case ("DSIM.Command.Active"):
-                                            var data8 = JsonConvert.DeserializeObject<MsgSpeedCommand>(content);
+                                            var data8 = JsonConvert.DeserializeObject<YDMSG.MsgSpeedCommand>(content);
                                             eventAggregator.GetEvent<ActiveSpeedCommand>().Publish(data8);
                                             break;
                                         case ("DSIM.Command.Execute"):
-                                            var data9 = JsonConvert.DeserializeObject<MsgSpeedCommand>(content);
+                                            var data9 = JsonConvert.DeserializeObject<YDMSG.MsgSpeedCommand>(content);
                                             eventAggregator.GetEvent<ExecuteSpeedCommand>().Publish(data9);
                                             break;
                                         default:
@@ -118,6 +134,42 @@ namespace CommandTransmission
             }
         }
 
+        //private static void RabbitMQ_MessageArrived(object sender, MsgCategoryEnum e)
+        //{
+        //    switch (e)
+        //    {
+        //        case (MsgCategoryEnum.CommandUpdate):
+        //            eventAggregator.GetEvent<CacheCommand>().Publish((MsgDispatchCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandApprove):
+        //            eventAggregator.GetEvent<ApproveCommand>().Publish((MsgDispatchCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandTransmit):
+        //            eventAggregator.GetEvent<TransmitCommand>().Publish((MsgDispatchCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandSign):
+        //            eventAggregator.GetEvent<SignCommand>().Publish((MsgCommandSign)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandAgentSign):
+        //            eventAggregator.GetEvent<AgentSignCommand>().Publish((MsgCommandSign)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandCheck):
+        //            eventAggregator.GetEvent<CheckSpeedCommand>().Publish((MsgSpeedCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.SpeedCache):
+        //            eventAggregator.GetEvent<CacheSpeedCommand>().Publish((MsgSpeedCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandActive):
+        //            eventAggregator.GetEvent<ActiveSpeedCommand>().Publish((MsgSpeedCommand)sender);
+        //            break;
+        //        case (MsgCategoryEnum.CommandExecute):
+        //            eventAggregator.GetEvent<ExecuteSpeedCommand>().Publish((MsgSpeedCommand)sender);
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //}
+
         /// <summary>
         /// 将消息发往指定主题
         /// </summary>
@@ -125,6 +177,24 @@ namespace CommandTransmission
         /// <param name="topic"></param>
         public static void SendMsg(object msg, string topic)
         {
+            //switch (msg.GetType().Name)
+            //{
+            //    case ("MsgDispatchCommand"):
+            //        ((MsgDispatchCommand)msg).Topic = topic;
+            //        _mqHelper.Publish((MsgDispatchCommand)msg);
+            //        break;
+            //    case ("MsgCommandSign"):
+            //        ((MsgCommandSign)msg).Topic = topic;
+            //        _mqHelper.Publish((MsgCommandSign)msg);
+            //        break;
+            //    case ("MsgSpeedCommand"):
+            //        ((MsgSpeedCommand)msg).Topic = topic;
+            //        _mqHelper.Publish((MsgSpeedCommand)msg);
+            //        break;
+            //    default:
+            //        break;
+            //}
+
             // 以下为测试代码
             ConnectionFactory factory = new ConnectionFactory { HostName = "39.108.177.237", Port = 5672, UserName = "admin", Password = "admin" };
             using (IConnection conn = factory.CreateConnection())
