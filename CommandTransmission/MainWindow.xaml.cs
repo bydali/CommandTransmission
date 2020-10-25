@@ -23,6 +23,9 @@ using Microsoft.Practices.Unity;
 using Newtonsoft.Json;
 using Prism.Events;
 using DSIM.Communications;
+using System.Net.Sockets;
+using System.Net;
+using System.IO;
 
 namespace CommandTransmission
 {
@@ -58,7 +61,7 @@ namespace CommandTransmission
                 {
                     foreach (Run fill in ((Hyperlink)item).Inlines)
                     {
-                        s += fill.Text;
+                        s += fill.Text.Trim();
                     }
                 }
             }
@@ -77,6 +80,7 @@ namespace CommandTransmission
             RegisterLocalEvent();
             RegisterMQIO();
 
+            //2020.9.11
             IO.ReceiveMsg(eventAggregator);
         }
 
@@ -374,7 +378,7 @@ namespace CommandTransmission
             ((AppVM)DataContext).ReceivedCmds.Insert(0, data);
 
             var speed = ((AppVM)DataContext).SpeedCmds.Where(i => i.CmdSN == data.CmdSN);
-            if (speed.Count()!=0)
+            if (speed.Count() != 0)
             {
                 if (cmd.CmdState == CmdState.已签收)
                 {
@@ -653,6 +657,7 @@ namespace CommandTransmission
                 {
                     IO.SendMsg(cmd, topic);
                 });
+                MessageBox.Show("调度命令已下达");
             }
             catch (Exception except)
             {
@@ -660,5 +665,62 @@ namespace CommandTransmission
             }
         }
 
+        private byte[] intToBytes(int value)
+        {
+            byte[] src = new byte[4];
+            src[3] = (byte)(value & 0xFF);
+            src[2] = (byte)((value >> 8) & 0xFF);
+            src[1] = (byte)((value >> 16) & 0xFF);
+            src[0] = (byte)((value >> 24) & 0xFF);
+            return src;
+        }
+
+        //2020.9.11
+        private async void SendCmd2Train(object sender, RoutedEventArgs e)
+        {
+            if (((AppVM)DataContext).CurrentCmd != null)
+            {
+                var cmd = ((AppVM)DataContext).CurrentCmd;
+                List<string> targets = new List<string>();
+                using (StreamReader sr = new StreamReader("cfg.txt"))
+                {
+                    string line;
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        targets.Add(line);
+                    }
+                }
+                string content = FillCmdContent();
+                string message = DateTime.Now.ToString() + '\n' +
+                    cmd.Title.Split('、')[1] + '\n' +
+                    content;
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        for (int i = 0; i < targets.Count; i++)
+                        {
+                            var ip = targets[i].Split('：')[1];
+                            var port = int.Parse(targets[i + 1].Split('：')[1]);
+                            UdpClient udpclient = new UdpClient();
+                            IPEndPoint ipendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+                            byte[] data = Encoding.UTF8.GetBytes(message);
+                            byte[] type = intToBytes(2);
+                            var tmp = BitConverter.IsLittleEndian;
+                            udpclient.Send(type, type.Length, ipendpoint);
+                            udpclient.Send(data, data.Length, ipendpoint);
+                            udpclient.Close();
+                            i++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("发送至列车失败");
+                    }
+                });
+            }
+        }
     }
 }

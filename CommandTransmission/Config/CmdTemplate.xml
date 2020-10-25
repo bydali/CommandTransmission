@@ -108,7 +108,7 @@
     <cmd title="27.(1)封锁区间"
          need_authorization="0"
          content="***站至***站间***行线因***，自接令时（***次列车到***站）起，区间封锁"/>
-    <cmd title="27.(2)开通区间"
+    <cmd title="27.(2)开通封锁区间"
          need_authorization="0"
          content="根据***站报告，***站至***站间***行线（***站***行线***道）完毕，区间已空闲，自接令时起区间开通"/>
   </cmd-type>
@@ -120,11 +120,11 @@
          need_authorization="0"
          content="根据***站报告，***站***道及***号道岔（含）至***站***道及***号道岔（含）间***行线***完毕，自接令时起开通"/>
   </cmd-type>
-  <cmd-type type="十六、出动、开行救援列车（救援队）">
-    <cmd title="29、出动、开行救援列车（救援队）"
+  <cmd-type type="十六、向封锁区间开行救援列车">
+    <cmd title="29、救援列车（救援队）出动"
          need_authorization="0"
          content="因***站至***站间***行线（***站）发生事故，***救援列车（救援队立即出动）"/>
-    <cmd title="30、出动、开行救援列车（救援队）"
+    <cmd title="30、救援列车开行"
          need_authorization="0"
          content="***站至***站间加开***次列车，***站***时***分开，按现时分办理，救援列车限速***km/h"/>
   </cmd-type>
@@ -176,15 +176,59 @@
          need_authorization="0"
          content="因防灾监控终端发生雨量封锁报警，准许***次列车以遇到阻碍能随时停车的速度（最多不超过20km/h）运行至前方站停车，发现危及行车安全时应立即停车"/>
   </cmd-type>
-  <cmd-type type="二十三、其他">
-    <cmd title="41、准许使用总辅助按钮改变闭塞方向"
+  <cmd-type type="二十三、临时变更行车闭塞法或恢复原行车闭塞法">
+    <cmd title="41、停用基本闭塞法，改用电话闭塞法"
+         need_authorization="0"
+         content="因***，自接令时（***次列车到***站）起，***站至***站间***行线停用基本闭塞法，改用电话闭塞法行车"/>
+    <cmd title="42、恢复原行车闭塞法"
+         need_authorization="0"
+         content="自接令时（***次列车到***站）起，***站至***站间***行线恢复基本闭塞法行车"/>
+    <cmd title="43、双线改单线行车（未设双线闭塞设备或双线双向闭塞设备故障）"
+         need_authorization="0"
+         content="因***，自接令时（***次到***站）起，***站至***站间***行线停用基本闭塞法，改用电话闭塞法，按单线行车"/>
+    <cmd title="44、恢复双线行车（未设双线闭塞设备或双线双向闭塞设备故障）"
+     need_authorization="0"
+     content="自接令时（***次到***站）起，恢复***站至***站间***行线基本闭塞法，***站至***站间恢复双线行车"/>
+  </cmd-type>
+  <cmd-type type="二十四、单机附挂车辆">
+    <cmd title="45、单机附挂车辆"
+         need_authorization="0"
+         content="准许***次在***站挂车***辆到***站，尾部车辆车号***"/>
+  </cmd-type>
+  <cmd-type type="二十五、货物列车超长、欠轴、违反列车编组计划">
+    <cmd title="46、货物列车超长"
+         need_authorization="0"
+         content="***次列车换长***，准许在***站至***站间超长运行"/>
+    <cmd title="47、货物列车欠轴"
+         need_authorization="0"
+         content="（根据部令***号，）准许***次欠轴开车（***分界站交车）"/>
+    <cmd title="48、货物列车违反列车编组计划"
+         need_authorization="0"
+         content="（根据部令***号，）准许***次挂有***辆，违反编组计划开车（***分界站交车）"/>
+  </cmd-type>
+  <cmd-type type="二十六、临时利用本务机车调车作业">
+    <cmd title="49、指定***次本务机车在***站进行调车作业"
+         need_authorization="0"
+         content="准许***次在***站挂车***辆到***站，尾部车辆车号***"/>
+  </cmd-type>
+  <cmd-type type="二十七、其他">
+    <cmd title="50、准许使用总辅助按钮改变闭塞方向"
          need_authorization="0"
          content="根据***站请求，现查明***站至***站间***行线区间空闲，准许***站使用总辅助按钮改变闭塞方向"/>
-    <cmd title="42、准许LKJ（机车信号）故障列车运行"
+    <cmd title="51、准许LKJ（机车信号）故障列车运行"
          need_authorization="0"
          content="因***次列车LKJ（机车信号）故障，准许***次列车运行至***站"/>
-    <cmd title="43、取消命令"
+    <cmd title="52、取消命令"
          need_authorization="0"
          content="自接令时起取消***年***月***日***时***分前发***号命令"/>
+    <cmd title="53、双线区间内进行跨线装卸作业，区间有除雪机、起重机工作，区间内发生特别重大、重大、大事故，对开入其邻线的列车"
+     need_authorization="0"
+     content="因***站至***站间***行线***km***m至***km***m处***，***次注意运行"/>
+    <cmd title="54、TDCS系统故障停用"
+     need_authorization="0"
+     content="因TDCS系统故障停用，***站至***站间自接令起，改用人工方式办理"/>
+    <cmd title="55、TDCS设备恢复命令"
+     need_authorization="0"
+     content="自接令时起***站至***站间，TDCS系统恢复使用"/>
   </cmd-type>
 </cmd-template>

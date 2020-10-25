@@ -745,13 +745,17 @@
 						<Button Content="按组选站"
 								Grid.Column="2"
 								HorizontalAlignment="Center" />
+						<Button HorizontalAlignment="Right"
+								Grid.Column="3"
+								Content="发送命令到列车"
+								Click="SendCmd2Train"/>
 					</Grid>
 					<DataGrid Name="allStationDg"
 							  AutoGenerateColumns="False"
 							  CanUserAddRows="False"
 							  ItemsSource="{Binding Targets}"
 							  Grid.Row="1"
-							  Style="{x:Null}">
+							  Style="{x:Null}" >
 						<DataGrid.Resources>
 							<ContextMenu x:Key="RowMenu">
 								<MenuItem Header="代签"
@@ -862,8 +866,8 @@
 									   HorizontalAlignment="Right" />
 								<ComboBox SelectedIndex="0"
 										  Grid.Column="1">
-									<ComboBoxItem Content="word1" />
-								</ComboBox>
+                                    <ComboBoxItem Content="车站名" />
+                                </ComboBox>
 								<Button Grid.Column="2"
 										Width="35">
 									<iconPacks:Material Kind="Wrench"
@@ -872,9 +876,10 @@
 								</Button>
 							</Grid>
 							<ListBox Grid.Row="1">
-								<ListBoxItem Content="test1" />
-								<ListBoxItem Content="test0" />
-								<ListBoxItem Content="转交司机" />
+                                <ListBoxItem Content="赤壁北" />
+                                <ListBoxItem Content="岳阳东" />
+                                <ListBoxItem Content="汨罗东" />
+                                <ListBoxItem Content="转交司机" />
 							</ListBox>
 							<StackPanel Orientation="Horizontal"
 										Grid.Row="2"
